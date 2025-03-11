@@ -37,6 +37,7 @@
 
 
     <h1>Student Login Details</h1>
+    <input type="text" id="searchInput" placeholder="Search (Admission Number, First Name, Last Name, Phone Number, Grade)...." onkeyup="searchTable()">
     <table>
         <thead>
             <tr>
@@ -48,7 +49,7 @@
                 <th>Update Password</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="tableBody">
             {% for student in students %}
             <tr>
                 <td>{{ student[0] }}</td>
@@ -59,12 +60,24 @@
                     <form action="/students_logins" method="post" class="update-form">
                         <input type="hidden" name="admission_number" value="{{ student[0] }}">
                         <input type="text" name="new_password" placeholder="New Password" required>
-                        <button type="submit">Update</button>
+                        <button class="btn btn-primary" type="submit">Update</button>
+                     
                     </form>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    <script>
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#tableBody tr');
+
+            tableRows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
 
 {% endblock %}

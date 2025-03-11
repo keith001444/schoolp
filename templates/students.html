@@ -1,37 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student List</title>
+{% extends "trainer.html" %}
+{% block content %}
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 15px;
-            text-align: left;
-        }
-        button {
-            background-color: red;
-            color: white;
-            padding: 5px 10px;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: darkred;
-        }
-    </style>
-</head>
-<body>
+     
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #f8f8f8;
+    color: #333;
+}
+h2 {
+    color: #333;
+}
+</style>
+
 
 <h1>Student List</h1>
-
+<input type="text" id="searchInput" placeholder="Search (Admission Number, First Name, Last Name, Phone Number, Grade)...." onkeyup="searchTable()">
 <table>
     <thead>
         <tr>
@@ -61,7 +54,8 @@
                         <td>${student.admission_no}</td>
                         <td>${student.first_name}</td>
                         <td>${student.last_name}</td>
-                        <td><button onclick="deleteStudent('${student.admission_no}')">Delete</button></td>
+                        <td><button type="button" class="btn btn-danger" onclick="deleteStudent('${student.admission_no}')">Delete</button></td>
+                       
                     `;
                     table.appendChild(row);
                 });
@@ -87,9 +81,18 @@
         }
     }
 
-    // Load students on page load
+    
+    function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#studentTable tr');
+
+            tableRows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.includes(input) ? '' : 'none';
+            });
+        }
+        // Load students on page load
     window.onload = loadStudents;
 </script>
 
-</body>
-</html>
+{% endblock %}

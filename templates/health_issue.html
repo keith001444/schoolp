@@ -65,7 +65,9 @@
     </style>
 
     <h2>Health Issue Students</h2>
+    <input type="text" id="searchInput" placeholder="Search (Admission Number, First Name, Last Name, Phone Number, Grade)...." onkeyup="searchTable()">
     <table>
+        <thead>
         <tr>
             <th>Admission Number</th>
             <th>First Name</th>
@@ -74,7 +76,9 @@
             <th>Treatment</th>
             <th>Actions</th>
         </tr>
+        </thead>
         {% for student in students %}
+        <tbody id="tableBody">
         <tr>
             <td>{{ student[0] }}</td>
             <td>{{ student[1] }}</td>
@@ -87,6 +91,7 @@
                 </form>
             </td>
         </tr>
+        </tbody>
         {% endfor %}
     </table>
 
@@ -108,4 +113,15 @@
             <button type="submit">Add Student</button>
         </form>
     </div>
+    <script>
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#tableBody tr');
+
+            tableRows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
 {% endblock %}

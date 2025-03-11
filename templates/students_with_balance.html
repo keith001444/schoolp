@@ -22,7 +22,10 @@
     </style>
 
     <h2>Students with Fee Balance</h2>
+    <input type="text" id="searchInput" placeholder="Search (Admission Number, First Name, Last Name, Balance)...." onkeyup="searchTable()">
     <table>
+        <thead>
+            
         <tr>
             <th>Admission Number</th>
             <th>First Name</th>
@@ -30,7 +33,9 @@
             <th>Last Name</th>
             <th>Balance</th>
         </tr>
+        </thead>
         {% for student in students %}
+        <tbody id="tableBody">
         <tr>
             <td>{{ student[0] }}</td>
             <td>{{ student[1] }}</td>
@@ -38,6 +43,18 @@
             <td>{{ student[3] }}</td>
             <td>{{ student[4] }}</td>
         </tr>
+        </tbody>
         {% endfor %}
     </table>
+    <script>
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const tableRows = document.querySelectorAll('#tableBody tr');
+
+            tableRows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
 {% endblock %}
