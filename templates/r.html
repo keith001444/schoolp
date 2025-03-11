@@ -1,0 +1,88 @@
+{% extends "dashboard.html" %}
+{% block content %}
+
+    <style>
+        /* Profile Card Container */
+        .profile-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Profile Picture */
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid #4caf50;
+        }
+
+        /* Profile Information */
+        h3 {
+            margin: 10px 0;
+            color: #333;
+            font-size: 24px;
+        }
+
+        p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        /* Progress Bar Container */
+        .progress-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        /* Progress Label */
+        .progress-label {
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Progress Fill */
+        .progress-bar-fill {
+            width: 30%;
+            height: 100%;
+            background-color: #4caf50;
+            transition: width 0.3s;
+        }
+    </style>
+
+    <div class="profile-container">
+        <img src="https://via.placeholder.com/100" alt="Profile Picture" class="profile-pic">
+        <h3>John Doe</h3>
+        <p>Email: johndoe@example.com</p>
+        <p>Phone: +123 456 7890</p>
+        <p>Gender: Male</p>
+        <p>Join Date: 2021-05-12</p>
+
+        <div class="progress-container">
+            <p class="progress-label">Progress to Completion: 30%</p>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

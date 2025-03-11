@@ -1,0 +1,92 @@
+{% extends "trainer.html" %}
+{% block content %}
+    <style>
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 40px 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        .container h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #28a745;
+        }
+        .container p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .container .checkmark {
+            font-size: 50px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .container .fee-input {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+        .container .back {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #dc3545;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-right: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .container .back:hover {
+            background-color: #c82333;
+        }
+        .container .continue {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #28a745;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .container .continue:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 576px) {
+            .container {
+                max-width: 90%;
+                padding: 20px 10px;
+            }
+            .container h1 {
+                font-size: 24px;
+            }
+            .container p {
+                font-size: 14px;
+            }
+            .container .checkmark {
+                font-size: 40px;
+            }
+        }
+    </style>
+
+    <div class="container">
+        <div class="checkmark">✔</div>
+        <form action="/update_balances" method="POST">
+            <h1>Do you want to update each student fee to be added to the new fee?</h1>
+            <p>Please enter the new fee amount:</p>
+            <input type="number" name="fee_amount" class="fee-input" placeholder="{{ fee_amount }}" required>
+
+            <button class="back" type="button" onclick="location.href='{{ url_for('index') }}'" aria-label="Go back to the index page">Back</button>
+            <button class="continue" type="submit" aria-label="Continue to update balances">Continue</button>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,178 @@
+/* General styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    /*background-color: #f8f9fa;*/
+    background-color: #E4F9F5;
+
+}
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 8px rgba(29, 78, 216, 0.3);
+}
+h1, h2 {
+    font-size: 2.5rem;
+}
+h1,h2{
+    text-align: center;
+}
+
+.activity-img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.container {
+    transition: margin-left 0.3s ease-in-out;
+    padding: 20px;
+    margin-left: 50px; /* Default margin without sidebar */
+}
+
+footer {
+    margin-top: 50px;
+    padding: 20px;
+    background-color: #f1f1f1;
+}
+
+/* Header styles */
+#dashboard-header {
+    background-color: #343a40; /* Same as the sidebar */
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+    display: flex;
+    justify-content: center; /* Center the content */
+    border-bottom: 5px solid #007bff; /* Blue border only at the bottom */
+}
+
+#dashboard-header h1 {
+    font-size: 2rem;
+    color: #fff;
+    margin: 0;
+}
+
+#menu-toggle {
+    display: inline-block;
+    position: absolute;
+    left: 20px;
+    top: 50%; /* Vertically align in the middle */
+    transform: translateY(-50%);
+}
+
+#menu-toggle span {
+    display: inline-block;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+/* Hide sidebar button (small arrow) */
+#hide-sidebar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    display: none; /* Initially hidden */
+}
+
+#sidebar.show #hide-sidebar {
+    display: inline; /* Show when sidebar is visible */
+}
+
+/* Adjust content when sidebar is shown */
+#content.sidebar-visible {
+    margin-left: 250px; /* Adjust content margin when sidebar is visible */
+}
+
+/* Sidebar styles */
+#sidebar {
+    position: fixed;
+    width: 200px;
+    height: 100%;
+    background: #343a40; /* Same as header */
+    color: #fff;
+    padding: 20px;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-250px); /* Hidden by default */
+    border-right: 5px solid #007bff; /* Blue border on the right */
+}
+
+#sidebar.show {
+    transform: translateX(0); /* Show sidebar when toggled */
+}
+
+.profile-section {
+    margin-bottom: 30px;
+}
+
+.profile-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+#sidebar h4, #sidebar p {
+    color: #fff;
+}
+
+#sidebar ul {
+    padding-left: 0;
+}
+
+#sidebar ul li {
+    list-style: none;
+    padding: 10px 0;
+}
+
+#sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+#sidebar ul li a:hover {
+    background-color: #495057;
+    padding-left: 10px;
+    transition: all 0.3s;
+}
+
+
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap; /* Allows images to wrap in case of overflow */
+    gap: 10px; /* Space between images */
+    justify-content: start; /* Align images to the left */
+    margin-bottom: 30px; /* Space below each gallery */
+}
+
+.image-gallery img {
+    width: 150px; /* Fixed width for uniformity */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+.my-foot{
+    text-align: center;
+    color: gray;
+    font-weight: light;
+}
+.books{
+position: relative;
+left: 30px;
+padding: 20px;
+}

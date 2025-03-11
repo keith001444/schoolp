@@ -1,0 +1,70 @@
+{% extends "trainer.html" %}
+{% block content %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #444;
+        }
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .update-form {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+    </style>
+
+
+    <h1>Student Login Details</h1>
+    <table>
+        <thead>
+            <tr>
+                 <th>Admission Number</th>
+                 <th>First Name</th>
+                 <th>Last Name</th>
+
+                <th>Password</th>
+                <th>Update Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student[0] }}</td>
+                <td>{{ student[1] }}</td>
+                <td>{{ student[2] }}</td>
+                <td>{{ student[3] }}</td>
+                <td>
+                    <form action="/students_logins" method="post" class="update-form">
+                        <input type="hidden" name="admission_number" value="{{ student[0] }}">
+                        <input type="text" name="new_password" placeholder="New Password" required>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

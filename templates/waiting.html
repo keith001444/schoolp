@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Processing Payment...</title>
+    <script>
+        function checkStatus() {
+            fetch('/check_payment_status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        window.location.href = "/payment_success";
+                    } else if (data.status === 'error') {
+                        window.location.href = "/payment_failed";
+                    }
+                });
+        }
+        setInterval(checkStatus, 5000);  // Check every 5 seconds
+    </script>
+</head>
+<body>
+    <h1>Processing Payment... Please wait.</h1>
+</body>
+</html>

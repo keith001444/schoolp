@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .profile { display: flex; gap: 20px; align-items: center; }
+        img { max-width: 150px; border-radius: 8px; }
+        .graph { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="profile">
+        <div>
+            <h1>{{ student[1] }}</h1>
+            <p>Email: {{ student[5] }}</p>
+            <p>Birth Date: {{ student[3] }}</p>
+            <p>Gender: {{ student[4] }}</p>
+            <p>Join Date: {{ student[6] }}</p>
+        </div>
+        {% if profile_pic_data %}
+            <img src="data:image/png;base64,{{ profile_pic_data }}" alt="Profile Picture">
+        {% else %}
+            <p>No Profile Picture</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <h2>Upload Profile Picture</h2>
+        <form action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data">
+            <input type="file" name="profile_pic" accept="image/*">
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+
+    <div class="graph">
+        <h2>Fee Payment Graph</h2>
+        <canvas id="paymentChart" width="400" height="200"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('paymentChart').getContext('2d');
+        const paymentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ dates | tojson }},
+                datasets: [{
+                    label: 'Amount Paid',
+                    data: {{ amounts | tojson }},
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Amount' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends "dashboard.html" %}
+{% block content %}
+    <h1>Memos</h1>
+
+
+        {% for book in books %}
+        <div class="books">
+
+            {% if book.image %}
+            <div>
+            <img src="{{ url_for('static', filename='uploads/images/' + book.image) }}" alt="Book Image" width="100">
+            </div>
+                {% endif %}
+            <div>
+            <a href="{{ url_for('download', filename=book.filename) }}">{{ book.filename }}</a>
+             </div>
+<!--            <form method="POST" action="{{ url_for('delete', filename=book.filename) }}" style="display:inline;">-->
+<!--                <button type="submit">Delete</button>-->
+
+        </div>
+        {% endfor %}
+
+{% endblock %}

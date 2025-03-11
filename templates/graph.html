@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Payment Data Line Graph</h1>
+    
+    <label for="admission_no">Admission Number:</label>
+    <input type="text" id="admission_no" placeholder="Enter Admission Number">
+    <button onclick="fetchData()">Load Graph</button>
+
+    <canvas id="paymentChart" width="400" height="200"></canvas>
+
+    <script>
+        let chart;
+
+        function fetchData() {
+            const admissionNo = document.getElementById('admission_no').value;
+
+            fetch('/get_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ admission_no: admissionNo })
+            })
+            .then(response => response.json())
+            .then(data => updateChart(data))
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('paymentChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy(); // Clear the previous chart if exists
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [
+                        {
+                            label: 'Amount Paid',
+                            data: data.amount_paid,
+                            borderColor: 'green',
+                            fill: false
+                        },
+                        {
+                            label: 'Remaining Balance',
+                            data: data.remaining_balance,
+                            borderColor: 'red',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amount'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

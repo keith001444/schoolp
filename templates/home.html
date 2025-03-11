@@ -1,0 +1,237 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Page Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Profile Card Container */
+        .profile-container {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Profile Picture */
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 3px solid #4caf50;
+        }
+
+        /* Profile Information */
+        h3 {
+            margin: 10px 0;
+            color: #333;
+            font-size: 24px;
+        }
+
+        p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        /* Progress Bar Container */
+        .progress-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        /* Progress Label */
+        .progress-label {
+            color: #333;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Progress Fill */
+        .progress-bar-fill {
+            width: 30%;
+            height: 100%;
+            background-color: #4caf50;
+        }
+
+        /* Graph Container */
+        .graph-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            min-height: 300px; /* Ensures the container is tall enough */
+        }
+
+        /* Section Title */
+        .section-title {
+            text-align: center;
+            color: #333;
+            margin: 30px 0 20px;
+            font-size: 24px;
+        }
+
+        /* Ensure the canvas takes the full width of its container */
+        canvas {
+            width: 100% !important;
+            max-height: 400px; /* Prevents chart from shrinking too much */
+        }
+    </style>
+
+    <!-- Profile Card -->
+    <div class="profile-container">
+        <img src="{{profile_pic}}" alt="Profile Pic" class="profile-pic">
+        <h3>{{name}} {{sname}}</h3>
+        <p>Email: {{email}}</p>
+        <p>Phone: {{phone}}</p>
+        <p>Gender: {{gender}}</p>
+        <p>Join Date: 2021-05-12</p>
+
+        <div class="progress-container">
+            <p class="progress-label">Progress to Completion of studies: 30%</p>
+            <div class="progress-bar">
+                <div class="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <h3 class="section-title">Fee Payment Tracker</h3>
+    <div class="graph-container">
+        <canvas id="paymentChart"></canvas>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const dates = JSON.parse('{{ dates | tojson }}') || [];
+                const amounts = JSON.parse('{{ amounts | tojson }}') || [];
+                const remainingBalance = JSON.parse('{{ remaining_balance | tojson }}') || [];
+
+                if (dates.length === 0) {
+                    console.warn("No data available to render the chart.");
+                    return;
+                }
+
+                const ctx = document.getElementById('paymentChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [
+                            {
+                                label: 'Amount Paid',
+                                data: amounts,
+                                borderColor: '#4CAF50',
+                                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointStyle: 'circle',
+                                pointRadius: 5,
+                                pointHoverRadius: 8,
+                            },
+                            {
+                                label: 'Remaining Balance',
+                                data: remainingBalance,
+                                borderColor: '#F44336',
+                                backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4,
+                                pointStyle: 'rectRot',
+                                pointRadius: 5,
+                                pointHoverRadius: 8,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                backgroundColor: '#333',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: '#ddd',
+                                borderWidth: 1
+                            },
+                            legend: {
+                                labels: {
+                                    color: '#333',
+                                    font: {
+                                        size: 14,
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Date',
+                                    color: '#333',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(200, 200, 200, 0.2)'
+                                },
+                                ticks: {
+                                    color: '#666'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Amount',
+                                    color: '#333',
+                                    font: {
+                                        size: 16,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(200, 200, 200, 0.2)'
+                                },
+                                ticks: {
+                                    color: '#666'
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Error rendering the chart:", error);
+            }
+        });
+    </script>
+{% endblock %}

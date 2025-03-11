@@ -1,0 +1,158 @@
+{% extends "trainer.html" %}
+{% block content %}
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        h2 {
+            color: #333;
+        }
+        .form-container {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-container h3 {
+            margin-top: 0;
+        }
+        .form-container label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-container input, .form-container button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-container button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .status-dropdown {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.update-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.update-btn:hover {
+    background-color: #0056b3;
+}
+
+    </style>
+
+    <h2>Non-Compliant Students</h2>
+    <table>
+        <tr>
+            <th>Admission Number</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Reason</th>
+            <th>Duration</th>
+            <th>Send Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+            <th>update Status</th>
+            <th>Actions</th>
+        </tr>
+        {% for student in students %}
+        <tr>
+            <td>{{ student[0] }}</td>
+            <td>{{ student[1] }}</td>
+            <td>{{ student[2] }}</td>
+            <td>{{ student[3] }}</td>
+            <td>{{ student[4] }}</td>
+            <td>{{ student[5] }}</td>
+            <td>{{ student[6] }}</td>
+            <td>{{ student[7] }}</td>
+            <td>
+                <form action="/update-status/{{ student[0] }}" method="POST" style="display: inline;">
+                    <select name="status" class="status-dropdown">
+                        <option value="Reported" {% if student[7] == 'Reported' %}selected{% endif %}>Reported</option>
+                        <option value="Pending" {% if student[7] == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Absent" {% if student[7] == 'Absent' %}selected{% endif %}>Absent</option>
+                    </select>
+                    <button type="submit" class="update-btn">Update</button>
+                </form>
+            </td>
+            <td>
+
+
+                <form action="/delete-student1/{{ student[0] }}" method="POST" style="display:inline;">
+                    <button type="submit" class="delete-btn">Delete</button>
+                </form>
+                <a href="/edit-student/{{ student[0] }}" class="edit-btn">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <div class="form-container">
+        <h3>Add New Non-Compliant Student</h3>
+        <form action="/add-student3" method="POST">
+            <label for="admission_no">Admission Number:</label>
+            <input type="text" id="admission_no" name="admission_no" required>
+
+            <label for="first_name">First Name:</label>
+            <input type="text" id="first_name" name="first_name" required>
+
+            <label for="last_name">Last Name:</label>
+            <input type="text" id="last_name" name="last_name" required>
+
+            <label for="reason">Reason:</label>
+            <input type="text" id="reason" name="reason" required>
+
+            <label for="duration">Duration:</label>
+            <input type="text" id="duration" name="duration" required>
+
+            <label for="send_date">Send Date:</label>
+            <input type="date" id="send_date" name="send_date" required>
+
+            <label for="return_date">Return Date:</label>
+            <input type="date" id="return_date" name="return_date" required>
+
+            <button type="submit">Add Student</button>
+        </form>
+    </div>
+{% endblock %}
