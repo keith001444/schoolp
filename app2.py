@@ -4,6 +4,7 @@ import profile1
 import send_mail1
 from requests.auth import HTTPBasicAuth
 import base64
+import webbrowser
 
 from flask import Flask, render_template, request, redirect,jsonify, flash, url_for, send_from_directory, session, send_file, request
 import sqlite3, os, database, document_functions, json,requests
@@ -1174,6 +1175,24 @@ def mpesa_callback():
         return jsonify({"status": "error", "message": result_desc}), 200
 
 
+
+
+@app.route('/send_message', methods=['POST'])
+def whatsapp():
+    try:
+        now = datetime.now()
+        hour = now.hour
+        minute = now.minute + 2  # Send message 2 minutes from now
+
+        phone = "+254110385662"
+        message = "Hello, I hope this message finds you well. I have a query. Please assist me."
+
+        pywhatkit.sendwhatmsg(phone, message, hour, minute, wait_time=10)  # Short wait time
+        return redirect('/trainer')
+    
+    except Exception as e:
+        return f"Error: {e}"
+        
 if __name__ == '__main__':
     if not os.path.exists('static/uploads'):
         os.makedirs('static/uploads')
