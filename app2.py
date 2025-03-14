@@ -708,9 +708,7 @@ def get_db_connection():
     return conn
 
 # Route to render the HTML page
-@app.route('/delete_students', methods=['GET','POST'])
-def delete_students():
-    return render_template('students.html')
+
 
 # API to fetch all students from the database
 @app.route('/all_students', methods=['GET','POST'])
@@ -1192,6 +1190,32 @@ def whatsapp():
     
     except Exception as e:
         return f"Error: {e}"
+@app.route('/teacher_signup')
+def signup_form():
+    return render_template('teachers_signup.html')
+
+@app.route('/signup', methods=['GET','POST'])
+def signup():
+    username = request.form['username']
+    email = request.form['email']
+    phone = request.form['phone']
+    grade = request.form['grade']
+    subject = request.form['subject']
+    date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = sqlite3.connect('admin.db')
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO teachers (username, email, phone, grade, subject, date) VALUES (?, ?, ?, ?, ?, ?)', 
+                   (username, email, phone, grade, subject, date))
+    conn.commit()
+    conn.close()
+
+    return "Signup Successful!"
+
+@app.route('/delete_students', methods=['GET','POST'])
+def delete_students():
+    return render_template('students.html')
+
         
 if __name__ == '__main__':
     if not os.path.exists('static/uploads'):

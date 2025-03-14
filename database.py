@@ -818,6 +818,24 @@ def get_admission_number(first_name, last_name):
         ''',(first_name.upper(), last_name.upper()))
         admission_number = cursor.fetchone()[0]
     return admission_number
+def teachers():
+    conn = sqlite3.connect('admin.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS teachers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            email TEXT,
+            phone TEXT,
+            grade TEXT,
+            subject TEXT,
+            date TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+
 
 
 
@@ -836,4 +854,4 @@ def add_all_tables():
     add_admin_data()
     add_non_compliant_students()
     setup_database()
-
+    teachers()
