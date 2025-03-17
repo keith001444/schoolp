@@ -181,7 +181,38 @@ def submit_check():
     database.insert_marks(document_functions.replace_slash_with_slash(request.form['admission_no']), marks_list)
 
 
+class_mapping = {
+    "1": "Grade 1",
+    "2": "Grade 2",
+    "3": "Grade 3",
+    "4": "Grade 4",
+    "5": "Grade 5",
+    "6": "Grade 6",
+    "7": "Form 1",
+    "8": "Form 2",
+    "9": "Form 3",
+    "10": "Form 4",
+    "11": "Form 5",
+    "12": "Form 6",
+}
 
+@app.route("/type_check")
+def teacher_classes(teacher_id):
+    conn = sqlite3.connect("school.db")
+    cursor = conn.cursor()
+    
+    # Fetch the subjects column for the teacher
+    cursor.execute("SELECT subjects FROM teachers WHERE id = ?", (teacher_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        subject_numbers = result[0].split(",")  # Convert "4,5,6" to ["4", "5", "6"]
+        class_options = {num: class_mapping[num] for num in subject_numbers if num in class_mapping}
+    else:
+        class_options = {}
+
+    return render_template("type_check1.html", class_options=class_options)
 
 @app.route('/type_check')
 def type_check():
@@ -847,6 +878,8 @@ def show_students():
     conn = sqlite3.connect('student.db')
     cursor = conn.cursor()
 
+    email, name, last_name = None, None, None  # Default values
+
     # Check if it's a POST request to update a password
     if request.method == 'POST':
         admission_number = request.form['admission_number']
@@ -856,16 +889,34 @@ def show_students():
         cursor.execute("UPDATE logins SET password = ? WHERE admission_no = ?", (new_password, admission_number))
         conn.commit()
 
+        # Fetch the email, first name, and last name for the given admission number
+        cursor.execute("SELECT email, first_name, last_name FROM students WHERE admission_no = ?", (admission_number,))
+        result = cursor.fetchone()
+        
+        if result:
+            email, name, last_name = result  # Unpacking the tuple
+
+            # Send Email Notification
+            sender_email = "richardkeith233@gmail.com"
+            sender_password = "mnoj wsox aumw tkrs"  # Use an App Password if 2FA is enabled
+            recipient_email = email
+
+            subject = "Crimsons Student Portal"
+            body = f"Hello {name},\n\nWe regret to inform you that your password has been updated by the Administration panel. Please confirm with the administration."
+
+            send_mail1.send_email(sender_email, recipient_email, sender_password, last_name, subject, body)
+
     # Fetch all student data
     cursor.execute('''
-                   SELECT students.admission_no, students.first_name, students.last_name,logins.password
+                   SELECT students.admission_no, students.first_name, students.last_name, logins.password
                    FROM students
                    JOIN logins
                    ON students.admission_no = logins.admission_no
                    ''')
     students = cursor.fetchall()
+    
     conn.close()
-
+    
     return render_template('students_logins.html', students=students)
 #=====================Update fee balances for each student
 # Route to display the HTML form
@@ -1091,8 +1142,9 @@ def get_access_token():
 
 
 
-@app.route('/pay_fees/<admission_no>', methods=['GET', 'POST'])
-def initiate_stk_push(admission_no):
+@app.route('/pay_fees', methods=['GET', 'POST'])
+def initiate_stk_push():
+    admission_no = session.get('admission_no')
     if request.method == 'POST':
         # If the form is submitted via POST, capture the data
         amount = request.form.get('amount')
@@ -1146,7 +1198,7 @@ def initiate_stk_push(admission_no):
             return jsonify({"status": "error", "message": "Failed to initiate payment"}), 500
     
     # If it's a GET request, just render the template and pass the admission_no
-    return render_template('pay_fees.html', admission_no=admission_no)
+    return render_template('pay_fees.html', admission_no=admission_no, profile_pic=database.get_profile(admission_no))
 
 
 # Callback listener to handle the result from Safaricom
@@ -1174,18 +1226,16 @@ def mpesa_callback():
 
 
 
+import pywhatkit
 
-@app.route('/send_message', methods=['POST'])
+@app.route('/send_message', methods=['GET','POST'])
 def whatsapp():
     try:
-        now = datetime.now()
-        hour = now.hour
-        minute = now.minute + 2  # Send message 2 minutes from now
 
         phone = "+254110385662"
         message = "Hello, I hope this message finds you well. I have a query. Please assist me."
 
-        pywhatkit.sendwhatmsg(phone, message, hour, minute, wait_time=10)  # Short wait time
+        pywhatkit.sendwhatmsg_instantly(phone, message)  # Short wait time
         return redirect('/trainer')
     
     except Exception as e:
@@ -1197,6 +1247,16 @@ def signup_form():
 @app.route('/signup', methods=['GET','POST'])
 def signup():
     username = request.form['username']
+    f_name = request.form['fname']
+    m_name = request.form['mname']
+    l_name = request.form['lname']
+    password = request.form['lname']
+    gender = request.form['gender']
+    age = request.form['age']
+    id_number = request.form['id-number']
+
+
+
     email = request.form['email']
     phone = request.form['phone']
     grade = request.form['grade']
@@ -1208,7 +1268,20 @@ def signup():
     cursor.execute('INSERT INTO teachers (username, email, phone, grade, subject, date) VALUES (?, ?, ?, ?, ?, ?)', 
                    (username, email, phone, grade, subject, date))
     conn.commit()
+    cursor.execute('INSERT INTO logins(position, password) VALUES(?, ?)',(username, password))
+    conn.commit()
+    cursor.execute('INSERT INTO admin_data(position, f_name, m_name, l_name, gender, age, id_number)',(username,f_name, m_name, l_name, gender, age, id_number))
+    conn.commit()
     conn.close()
+    sender_email = "richardkeith233@gmail.com"
+    sender_password = "mnoj wsox aumw tkrs"  # Use App Password if 2FA is enabled
+    recipient_email = email
+    password2 = l_name
+
+    subject = "Chrimsons portal"
+    body = f"Welcome and feel at home your last name will be your default password: {password2}, Your admission number: {admission_no}"
+
+    send_mail1.send_email(sender_email,recipient_email, sender_password, password2, subject, body)
 
     return "Signup Successful!"
 

@@ -467,30 +467,43 @@ import app2
 
 # # Example usage:
 # insert_email('student.db', '0759843995', 'EB3/57373/21')
-def insert_image(db_path: str, admission_no: str, image_path: str):
-    try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+# def insert_image(db_path: str, admission_no: str, image_path: str):
+#     try:
+#         conn = sqlite3.connect(db_path)
+#         cursor = conn.cursor()
         
-        # Read the image file as binary
-        with open(image_path, 'rb') as file:
-            image_data = file.read()
+#         # Read the image file as binary
+#         with open(image_path, 'rb') as file:
+#             image_data = file.read()
         
-        # Update the image where admission_no matches
-        cursor.execute("UPDATE students SET profile_pic = ? WHERE admission_no = ?", (image_data, admission_no))
+#         # Update the image where admission_no matches
+#         cursor.execute("UPDATE students SET profile_pic = ? WHERE admission_no = ?", (image_data, admission_no))
         
-        if cursor.rowcount == 0:
-            print("No matching admission number found.")
-        else:
-            print("Image inserted successfully.")
+#         if cursor.rowcount == 0:
+#             print("No matching admission number found.")
+#         else:
+#             print("Image inserted successfully.")
         
-        conn.commit()
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-    except FileNotFoundError:
-        print("Image file not found.")
-    finally:
-        conn.close()
+#         conn.commit()
+#     except sqlite3.Error as e:
+#         print(f"Database error: {e}")
+#     except FileNotFoundError:
+#         print("Image file not found.")
+#     finally:
+#         conn.close()
 
-# Example usage:
-insert_image('student.db', 'EB3/57373/21', 'cartoon.jpg')
+# # Example usage:
+# insert_image('student.db', 'EB3/57373/21', 'cartoon.jpg')
+with sqlite3.connect('admin.db') as conn:
+    cursor = conn.cursor()
+
+    # Check if column 'id_number' already exists
+    cursor.execute("PRAGMA table_info(admin_data);")
+    columns = [column[1] for column in cursor.fetchall()]
+
+    if "id_number" not in columns:
+        cursor.execute('ALTER TABLE admin_data ADD COLUMN id_number TEXT')
+        conn.commit()
+        print('Column "id_number" added successfully.')
+    else:
+        print('Column "id_number" already exists.')
