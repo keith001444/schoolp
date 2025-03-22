@@ -426,6 +426,9 @@ def students_with_balance():
 def add_or_remove_student():
     return render_template("add_or_remove_student.html")
 
+@app.route('/add_remove_teacher')
+def a_or_r():
+    return render_template("add_or_remove_teacher.html")
 
 @app.route('/add_student')
 def add():
@@ -501,7 +504,6 @@ def all_students():
         ''')
         result = cursor.fetchall()
         return result
-
 
 @app.route('/registered_students')
 def registered():
@@ -755,11 +757,43 @@ def get_students():
     student_list = [{'admission_no': document_functions.replace_slash_with_dot(student['admission_no']), 'first_name': student['first_name'], 'last_name':student['last_name'],'grade':student['Grade']} for student in students]
     return jsonify(student_list)
 
+@app.route('/all_teachers',  methods=['GET','POST'])
+def all_teachers():
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT admin_data.position, admin_data.f_name, admin_data.l_name, teachers.grade, teachers.subject                               
+        FROM admin_data
+        JOIN teachers ON admin_data.position = teachers.username
+        ORDER BY admin_data.position ASC
+        ''')
+        result = cursor.fetchall()
+
+    # Convert result to a list of dictionaries
+    teachers_list = [
+        {
+            "username": row[0],
+            "f_name": row[1],
+            "l_name": row[2],
+            "grade": row[3],
+            "subject": row[4]
+        }
+        for row in result
+    ]
+
+    return jsonify(teachers_list)  # Ensure the response is JSON-formatted
+
+
 # API to delete a student by ID
 @app.route('/delete_student/<admission_no>', methods=['DELETE','POST'])
 def delete_student(admission_no):
     admission = document_functions.replace_slash_with_slash(admission_no)
     database.delete_student(admission)
+    return jsonify({'success': True})
+
+@app.route('/delete_teacher/<username>', methods=['DELETE','POST'])
+def delete_teacher(username):
+    database.delete_teacher(username)
     return jsonify({'success': True})
 #===============Change Password
 @app.route('/change_password', methods=['GET', 'POST'])
@@ -1270,7 +1304,10 @@ def signup():
     conn.commit()
     cursor.execute('INSERT INTO logins(position, password) VALUES(?, ?)',(username, password))
     conn.commit()
-    cursor.execute('INSERT INTO admin_data(position, f_name, m_name, l_name, gender, age, id_number)',(username,f_name, m_name, l_name, gender, age, id_number))
+    cursor.execute(
+    'INSERT INTO admin_data (position, f_name, m_name, l_name, gender, age, id_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    (username, f_name, m_name, l_name, gender, age, id_number))
+
     conn.commit()
     conn.close()
     sender_email = "richardkeith233@gmail.com"
@@ -1278,17 +1315,20 @@ def signup():
     recipient_email = email
     password2 = l_name
 
-    subject = "Chrimsons portal"
-    body = f"Welcome and feel at home your last name will be your default password: {password2}, Your admission number: {admission_no}"
+    subject = "Crimsons portal"
+    body = f"Welcome teacher {f_name} {l_name} and feel at home your last name will be your default password: {password2} and Username: {username}"
 
     send_mail1.send_email(sender_email,recipient_email, sender_password, password2, subject, body)
 
-    return "Signup Successful!"
+    return "Teacher Signup Successful!"
 
 @app.route('/delete_students', methods=['GET','POST'])
 def delete_students():
     return render_template('students.html')
 
+@app.route('/delete_teachers', methods=['GET','POST'])
+def delete_teachers():
+    return render_template('teachers.html')
         
 if __name__ == '__main__':
     if not os.path.exists('static/uploads'):

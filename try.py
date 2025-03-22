@@ -494,16 +494,65 @@ import app2
 
 # # Example usage:
 # insert_image('student.db', 'EB3/57373/21', 'cartoon.jpg')
-with sqlite3.connect('admin.db') as conn:
-    cursor = conn.cursor()
+# with sqlite3.connect('admin.db') as conn:
+#     cursor = conn.cursor()
 
-    # Check if column 'id_number' already exists
-    cursor.execute("PRAGMA table_info(admin_data);")
-    columns = [column[1] for column in cursor.fetchall()]
+#     # Check if column 'id_number' already exists
+#     cursor.execute("PRAGMA table_info(admin_data);")
+#     columns = [column[1] for column in cursor.fetchall()]
 
-    if "id_number" not in columns:
-        cursor.execute('ALTER TABLE admin_data ADD COLUMN id_number TEXT')
-        conn.commit()
-        print('Column "id_number" added successfully.')
-    else:
-        print('Column "id_number" already exists.')
+#     if "id_number" not in columns:
+#         cursor.execute('ALTER TABLE admin_data ADD COLUMN id_number TEXT')
+#         conn.commit()
+#         print('Column "id_number" added successfully.')
+#     else:
+#         print('Column "id_number" already exists.')
+# import sqlite3
+
+# # Connect to the database
+# db_path = "admin.db"  # Ensure this is the correct path
+# conn = sqlite3.connect(db_path)
+# cursor = conn.cursor()
+
+# # Enable Foreign Key Support
+# cursor.execute("PRAGMA foreign_keys = ON;")
+
+# # Create teachers table if not exists
+# cursor.execute("DROP TABLE IF EXISTS logins")
+# cursor.execute("DROP TABLE IF EXISTS admin_data_new")
+
+# # Create new admin_data table with foreign key constraint
+# cursor.execute("""
+# CREATE TABLE IF NOT EXISTS logins(
+#     position TEXT ,
+#     password TEXT,
+#     FOREIGN KEY (position) REFERENCES teachers (username) ON DELETE CASCADE
+# );
+# """)
+
+# # Copy data from old table if it exists
+
+
+# # Drop old table and rename the new one
+
+
+
+# # Commit and close connection
+# conn.commit()
+# conn.close()
+
+# print("Foreign key added successfully!")
+import sqlite3
+
+conn = sqlite3.connect('admin.db')
+cursor = conn.cursor()
+cursor.execute('''
+    SELECT admin_data.username, admin_data.f_name, admin_data.l_name, teachers.grade, teachers.subject                               
+    FROM admin_data
+    JOIN teachers ON admin_data.username = teachers.position
+    ORDER BY admin_data.username ASC
+''')
+result = cursor.fetchall()
+conn.close()
+
+print(result)  # Check if data is returned

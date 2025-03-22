@@ -447,6 +447,62 @@ def remove_student_subjects(admission_no):
         # Commit the transaction to make sure the deletion is saved
         conn.commit()
 
+def del_teacher_details(username):
+    
+    # Connect to the SQLite database
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+
+        # Define the SQL query with a parameter placeholder
+        query = '''
+            DELETE FROM admin_data WHERE position = ?
+        '''
+
+        # Execute the query with the admission number as the parameter
+        cursor.execute(query, (username,))
+
+        # Commit the transaction to make sure the deletion is saved
+        conn.commit()
+def del_teacher(username):
+    
+    # Connect to the SQLite database
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+
+        # Define the SQL query with a parameter placeholder
+        query = '''
+            DELETE FROM teachers WHERE username = ?
+        '''
+
+        # Execute the query with the admission number as the parameter
+        cursor.execute(query, (username,))
+
+        # Commit the transaction to make sure the deletion is saved
+        conn.commit()
+
+def del_teacher_logins(username):
+    
+    # Connect to the SQLite database
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+
+        # Define the SQL query with a parameter placeholder
+        query = '''
+            DELETE FROM logins WHERE position = ?
+        '''
+
+        # Execute the query with the admission number as the parameter
+        cursor.execute(query, (username,))
+
+        # Commit the transaction to make sure the deletion is saved
+        conn.commit()
+
+#------------Delete all Teacher data --------------------
+def delete_teacher(username):
+    del_teacher_details(username)
+    del_teacher_logins(username)
+    del_teacher(username)
+
 
 #--------------Remove all data from a student----------------------------
 def delete_student(admission_no):
