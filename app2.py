@@ -168,7 +168,11 @@ def submit_marks():
     year = request.form['year']
     term = request.form['term']
     # You can now use marks_list for further processing, such as inserting into a database
-    database.iMarks submitted successfully!
+    database.insert_marks(year, term, exam_type, admission_no, marks_list)
+    database.set_average(admission_no,term, year, exam_type)
+
+    return "Marks submitted successfully!"
+
 
 
 @app.route('/submit_selection', methods=['GET', 'POST'])
