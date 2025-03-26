@@ -494,17 +494,18 @@ import app2
 
 # # Example usage:
 # insert_image('student.db', 'EB3/57373/21', 'cartoon.jpg')
-# with sqlite3.connect('admin.db') as conn:
+# with sqlite3.connect('fees.db') as conn:
 #     cursor = conn.cursor()
 
 #     # Check if column 'id_number' already exists
 #     cursor.execute("PRAGMA table_info(admin_data);")
 #     columns = [column[1] for column in cursor.fetchall()]
 
-#     if "id_number" not in columns:
-#         cursor.execute('ALTER TABLE admin_data ADD COLUMN id_number TEXT')
+#     if "method_id" not in columns:
+#         cursor.execute('ALTER TABLE payment_history ADD COLUMN method_of_payment TEXT')
+#         cursor.execute('ALTER TABLE payment_history ADD COLUMN method_id TEXT')
 #         conn.commit()
-#         print('Column "id_number" added successfully.')
+#         print('Method of payment added successfully.')
 #     else:
 #         print('Column "id_number" already exists.')
 # import sqlite3
@@ -542,17 +543,157 @@ import app2
 # conn.close()
 
 # print("Foreign key added successfully!")
+# import sqlite3
+
+# conn = sqlite3.connect('payments.db')
+# cursor = conn.cursor()
+# cursor.execute('''
+#     CREATE TABLE IF NOT EXISTS transactions (
+#     id INTEGER PRIMARY KEY AUTOINCREMENT,
+#     phone TEXT,
+#     amount REAL,
+#     mpesa_receipt TEXT,
+#     transaction_date TEXT,
+#     status TEXT
+# )
+
+# ''')
+# conn.commit()
+# conn.close()
+
+# import sqlite3
+
+# # Connect to the SQLite database
+# conn = sqlite3.connect("student.db")  # Replace with your actual database name
+# cursor = conn.cursor()
+
+# # Query to fetch all emails from the students table
+# cursor.execute("SELECT email FROM students")
+
+# # Fetch all results and extract emails as a list
+# emails = [row[0] for row in cursor.fetchall()]
+
+
+
+# # Print or use the email list
+# print(emails)
+
+# # Close the connection
+# conn.close()
+# import sqlite3
+
+# def get_student_emails(db_name, tableName, colName):
+#     try:
+#         # Connect to the database
+#         conn = sqlite3.connect(db_name)
+#         cursor = conn.cursor()
+
+#         # Execute query to fetch all emails
+#         cursor.execute(f"SELECT {colName} FROM {tableName}")
+#         emails = [row[0] for row in cursor.fetchall()]
+
+#         # Close the connection
+#         conn.close()
+
+#         return emails
+#     except sqlite3.Error as e:
+#         print(f"Database error: {e}")
+#         return []
+
+# # Example usage
+# emails_list = get_student_emails('student.db','students','email')
+
+# if 'richardkeith233@gmail.com' in emails_list:
+#     print("wow found")
+# else:
+#     print("not found")
+
+# with sqlite3.connect('manager.db') as conn:
+#     cursor = conn.cursor()
+#     cursor.execute('ALTER TABLE manager ADD COLUMN email TEXT')
+#     conn.commit()
+#     print("email column added successfully")
+
+# import sqlite3
+
+# def get_password(db_name, email):
+#     try:
+#         # Connect to the SQLite database
+#         conn = sqlite3.connect(db_name)
+#         cursor = conn.cursor()
+
+#         # Query to fetch the password for the given username
+#         cursor.execute('''SELECT logins.password 
+#         FROM logins
+#         JOIN teachers ON  students.admission_no = logins.position
+#         WHERE students.email = ?''', (email,))
+#         result = cursor.fetchone()
+
+#         # Close the connection
+#         conn.close()
+
+#         # Return the password if found, otherwise return None
+#         return result[0] if result else None
+#     except sqlite3.Error as e:
+#         print(f"Database error: {e}")
+#         return None
+
+# # Example usage
+# username = "student.db"  # Replace with the actual username
+# email = "richardkeith233@gmail.com"
+# password = get_password('student.db',email)
+# print(f"Password for {username}: {password}" if password else "User not found")
+# import sqlite3
+
+# def add_profile_picture_column(db_name="admin.db"):
+#     """Adds a profile_picture column to the users table if it does not exist."""
+#     try:
+#         # Connect to the database
+#         conn = sqlite3.connect(db_name)
+#         cursor = conn.cursor()
+
+#         # Add the column if it does not already exist
+#         cursor.execute("PRAGMA table_info(users)")
+#         columns = [row[1] for row in cursor.fetchall()]
+        
+#         if "profile_picture" not in columns:
+#             cursor.execute("ALTER TABLE admin_data ADD COLUMN profile_picture BLOB")
+#             conn.commit()
+#             print("Column 'profile_picture' added successfully.")
+#         else:
+#             print("Column 'profile_picture' already exists.")
+
+#         # Close the connection
+#         conn.close()
+#     except sqlite3.Error as e:
+#         print(f"Database error: {e}")
+
+# # Run the function
+# add_profile_picture_column()
 import sqlite3
 
-conn = sqlite3.connect('admin.db')
-cursor = conn.cursor()
-cursor.execute('''
-    SELECT admin_data.username, admin_data.f_name, admin_data.l_name, teachers.grade, teachers.subject                               
-    FROM admin_data
-    JOIN teachers ON admin_data.username = teachers.position
-    ORDER BY admin_data.username ASC
-''')
-result = cursor.fetchall()
-conn.close()
+def insert_profile_picture(user_id, image_path, db_name="admin.db"):
+    """Inserts an image as a profile picture for a user in the SQLite database."""
+    try:
+        # Read the image file as binary
+        with open(image_path, "rb") as file:
+            image_data = file.read()
+        
+        # Connect to the database
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
 
-print(result)  # Check if data is returned
+        # Update the profile_picture column for the given user_id
+        cursor.execute("UPDATE admin_data SET profile_picture = ? WHERE position = ?", (image_data, user_id))
+        conn.commit()
+        print("Profile picture updated successfully.")
+
+        # Close the connection
+        conn.close()
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    except FileNotFoundError:
+        print("Image file not found.")
+
+# Example usage
+insert_profile_picture('kay', 'cartoon.jpg')  # Replace 1 with the actual user ID and "profile.jpg" with the image path

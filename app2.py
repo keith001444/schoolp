@@ -21,6 +21,7 @@ import time
 import graph2
 
 app = Flask(__name__)
+
 app.secret_key = 'My_Secret_Key'
 
 TOTAL_FEES = 2000
@@ -69,7 +70,9 @@ def login():
 
                             count = cursor.fetchone()[0]
                             if count > 0:
+                                session['userName'] = admission_no
                                 return redirect(url_for('admin_dashboard'))
+                                
                             else:
                                 return render_template('login.html', error="Invalid admission number or password")
     return render_template('login.html')
@@ -83,10 +86,12 @@ def home():
     return render_template('home.html', name=database.get_first_name(admission_no),sname=database.get_last_name(admission_no),email=database.get_email(admission_no),phone_number = database.get_phone(admission_no), gender= database.get_gender(admission_no),profile_pic = database.get_profile(admission_no),
                            greeting=document_functions.greet_based_on_time(), admission_no=document_functions.replace_slash_with_dot(admission_no),dates=dates, amounts=amounts,remaining_balance=remaining_balance,admission_number= admission_number)
 
-
+@app.route('/tdash')
+def teacher_home():
+    userName = session.get('userName')
+    return render_template('thome.html',profile_pic = database.get_profile_t(userName),name = database.get_first_name_t(userName), sname=database.get_last_name_t(userName),email=database.get_email_t(userName),phone = database.get_phone_t(userName), gender= database.get_gender_t(userName), join_date = database.get_join_date_t(userName))
 @app.route('/fee')
 def fee():
-    
     return render_template('fee.html')
 
 
@@ -163,11 +168,7 @@ def submit_marks():
     year = request.form['year']
     term = request.form['term']
     # You can now use marks_list for further processing, such as inserting into a database
-    database.insert_marks(year, term, exam_type, admission_no, marks_list)
-    database.set_average(admission_no,term, year, exam_type)
-
-    return "Marks submitted successfully!"
-
+    database.iMarks submitted successfully!
 
 
 @app.route('/submit_selection', methods=['GET', 'POST'])
@@ -505,10 +506,30 @@ def all_students():
         result = cursor.fetchall()
         return result
 
+@app.route('/all_teacher',  methods=['GET','POST'])
+def all_teacher():
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT admin_data.position, admin_data.f_name, admin_data.l_name, teachers.grade, teachers.subject                               
+        FROM admin_data
+        JOIN teachers ON admin_data.position = teachers.username
+        ORDER BY admin_data.position ASC
+        ''')
+        result = cursor.fetchall()
+        return result
+
+
+
 @app.route('/registered_students')
 def registered():
     students = all_students()
     return render_template('registered_students.html',students=students)
+
+@app.route('/registered_teachers')
+def registered1():
+    teachers = all_teacher()
+    return render_template('registered_teachers.html',teachers = teachers)
     
 
 
@@ -1174,92 +1195,83 @@ def get_access_token():
         logger.error(f"Error generating token: {response.text}")
         return None
 
-
-
-@app.route('/pay_fees', methods=['GET', 'POST'])
-def initiate_stk_push():
+@app.route('/pay_myfees')
+def my_fee_payment():
     admission_no = session.get('admission_no')
-    if request.method == 'POST':
-        # If the form is submitted via POST, capture the data
-        amount = request.form.get('amount')
-        phone_number = request.form.get('phone_number')
+    return render_template('pay_fees.html', profile_pic=database.get_profile(admission_no))
 
-        # Validate that we received the necessary data
-        if not amount or not phone_number:
-            logger.error("Missing amount or phone number")
-            return jsonify({"status": "error", "message": "Amount and Phone number are required."}), 400
+# M-Pesa API Credentials
+CONSUMER_KEY = "twd2Fk9toBVjeGi67JCCfEqh0uB7OJPXNiA63g44ek3dpskP"
+CONSUMER_SECRET = "9lXIcf6er5THdG7DAZWpv8sGeiXyEziH13RuTmuFVGAWhAJxB6LqPWMHUbrWFnx2"
+BUSINESS_SHORT_CODE = "174379"
+PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+CALLBACK_URL = "https://crimson-feather-42861.pktriot.net/mpesa_callback"
 
-        access_token = get_access_token()
+
+@app.route("/pay_fees",  methods=['GET', 'POST'])
+def stk_push():
+    phone = request.form["phone"]
+    session['phone'] = phone
+    amount = request.form["amount"]
+    session['amount'] = amount
+    account_reference = session.get('admission_no')
+    access_token = get_access_token()
+
+    if not access_token:
+        return jsonify({"error": "Failed to get access token"})
+
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    password = base64.b64encode((BUSINESS_SHORT_CODE + PASSKEY + timestamp).encode()).decode()
     
-        if not access_token:
-            logger.error("Error: Could not get access token.")
-            return jsonify({"status": "error", "message": "Could not get access token"}), 500
+    stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    payload = {
+        "BusinessShortCode": BUSINESS_SHORT_CODE,
+        "Password": password,
+        "Timestamp": timestamp,
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": amount,
+        "PartyA": phone,
+        "PartyB": BUSINESS_SHORT_CODE,
+        "PhoneNumber": phone,
+        "CallBackURL": CALLBACK_URL,
+        "AccountReference": account_reference,
+        "TransactionDesc": "Fees payment"
+    }
+    response = requests.post(stk_url, json=payload, headers=headers)
     
-        headers = {
-            "Authorization": f"Bearer {access_token}",
-            "Content-Type": "application/json"
-        }
-    
-        business_short_code = "174379"
-        passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        password_str = business_short_code + passkey + timestamp
-        password = base64.b64encode(password_str.encode('utf-8')).decode('utf-8')
-    
-        data = {
-            "BusinessShortCode": business_short_code,
-            "Password": password,
-            "Timestamp": timestamp,
-            "TransactionType": "CustomerPayBillOnline",
-            "PartyA": phone_number,
-            "PartyB": business_short_code,
-            "PhoneNumber": phone_number,
-            "CallBackURL": "https://279a-197-136-183-18.ngrok-free.app/mpesa/callback",  # Correct callback URL
-            "AccountReference": admission_no,
-            "TransactionDesc": "Fee Payment",
-            "Amount": amount
-        }
-    
-        endpoint = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-        response = requests.post(endpoint, json=data, headers=headers)
-    
-        logger.info(f"Response Status Code: {response.status_code}")
-        logger.info(f"Response Body: {response.text}")
-        if response.status_code == 200:
-            return redirect(url_for('mpesa_callback'), code=307)# Or render success message on the template
-        else:
-            logger.error(f"Failed to initiate STK Push: {response.json()}")
-            return jsonify({"status": "error", "message": "Failed to initiate payment"}), 500
-    
-    # If it's a GET request, just render the template and pass the admission_no
-    return render_template('pay_fees.html', admission_no=admission_no, profile_pic=database.get_profile(admission_no))
+    return jsonify(response.json())
 
 
 # Callback listener to handle the result from Safaricom
-@app.route('/mpesa/callback', methods=['POST'])
+
+@app.route("/mpesa_callback", methods=["POST"])
 def mpesa_callback():
-    response_data = request.get_json()
-    
-    logger.info(f"Callback Response: {response_data}")
-    
-    result_code = response_data['Body']['stkCallback']['ResultCode']
-    result_desc = response_data['Body']['stkCallback']['ResultDesc']
-    
-    if result_code == 0:
-        logger.info(f"Payment Successful: {result_desc}")
-        print("success")
-        return jsonify({"status": "success", "message": "Payment completed successfully!"}), 200
-    elif result_code == 1032:
-        logger.info(f"Payment Canceled: {result_desc}")
-        print("cancelled")
-        return jsonify({"status": "cancelled", "message": "Payment was canceled by the user."}), 200
-    else:
-        logger.error(f"Error: {result_desc}")
-        print("Error")
-        return jsonify({"status": "error", "message": result_desc}), 200
+    print("Hello  callback!!1")
+    data = request.get_json()
+    print("Hello  callback!!")
+    if data and "Body" in data and "stkCallback" in data["Body"]:
+        callback = data["Body"]["stkCallback"]
+        result_code = callback["ResultCode"]
+        result_desc = callback["ResultDesc"]
+        transaction_id = callback.get("CheckoutRequestID", None)
 
+        # Determine payment status
+        status = "Fail" if result_code != 0 else "Success"
 
+        
+        print(f'payment is a {status}')
+        # if "CallbackMetadata" in callback:
+        #     for item in callback["CallbackMetadata"]["Item"]:
+        #         if item["Name"] == "PhoneNumber":
+        #             phone_number = item["Value"]
+        #         if item["Name"] == "Amount":  # Extracting Amount
+        #             amount = item["Value"]
+        #         admission_no = session.get('admission_no')
+        # print(f'{phone_number} paid {amount} of adimission_no {admission_no}')
+        return jsonify({"message": "Callback received", "status": status, "description": result_desc})
 
+    return jsonify({"error": "Invalid callback data"}), 400
 import pywhatkit
 
 @app.route('/send_message', methods=['GET','POST'])
@@ -1329,6 +1341,38 @@ def delete_students():
 @app.route('/delete_teachers', methods=['GET','POST'])
 def delete_teachers():
     return render_template('teachers.html')
+
+
+@app.route("/forgot_password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form["email"]
+        student_email = database.get_emails('student.db','students','email')
+        admin_email = database.get_emails('manager.db', 'manager', 'email')
+        teacher_email = database.get_emails('admin.db','teachers', 'email' )
+        users = student_email + admin_email + teacher_email
+        default_password = None
+        if email in users:
+            if email in student_email:
+                default_password = database.get_password_s('student.db', email)
+            elif email in admin_email:
+                default_password = database.get_password_m('manager.db', email)
+            elif email in teacher_email:
+                default_password = database.get_password_t('admin.db', email)
+            
+             # You can generate a random one
+           
+            sender_email = "richardkeith233@gmail.com"
+            sender_password = "mnoj wsox aumw tkrs"
+            subject = "Password Reset"
+
+            body = f"Your new password is: {default_password}. Please log in and change it."
+
+            send_mail1.forgot_m_pass(sender_email,sender_password, email, subject, body)
+            # Send email
+            
+    return render_template("forgot_password.html")
+
         
 if __name__ == '__main__':
     if not os.path.exists('static/uploads'):

@@ -141,6 +141,22 @@ def get_first_name(admission_no):
         return None
 
 
+def get_first_name_t(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT f_name
+            FROM admin_data
+            WHERE position = ?
+        ''', (username,))
+
+        result = cursor.fetchone()
+    if result:
+        return result[0]  # Return the first name
+    else:
+        return None
+
+
 def get_middle_name(admission_no):
     with sqlite3.connect('student.db') as conn:
         cursor = conn.cursor()
@@ -172,6 +188,22 @@ def get_last_name(admission_no):
     else:
         return None
 
+
+def get_last_name_t(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT l_name
+            FROM admin_data
+            WHERE position = ?
+        ''', (username,))
+
+        result = cursor.fetchone()
+    if result:
+        return result[0]  # Return the last name
+    else:
+        return None
+
 def get_email(admission_no):
     with sqlite3.connect('student.db') as conn:
         cursor = conn.cursor()
@@ -186,14 +218,42 @@ def get_email(admission_no):
     else:
         return None
 
+def get_email_t(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT email
+            FROM teachers
+            WHERE username = ?
+        ''',(username,))
+        result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        return None
+
 def get_phone(admission_no):
     with sqlite3.connect('student.db') as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT email
-            FROM students
+            SELECT phone_number
+            FROM rest
             WHERE admission_no = ?
         ''',(admission_no,))
+        result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        return None
+
+def get_phone_t(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT phone
+            FROM teachers
+            WHERE username = ?
+        ''',(username,))
         result = cursor.fetchone()
     if result:
         return result[0]
@@ -214,6 +274,36 @@ def get_gender(admission_no):
     else:
         return None
 
+def get_gender_t(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT gender
+            FROM admin_data
+            WHERE position = ?
+        ''',(username,))
+        result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        return None
+
+
+def get_join_date_t(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT date
+            FROM teachers
+            WHERE username = ?
+        ''',(username,))
+        result = cursor.fetchone()
+    if result:
+        return result[0]
+    else:
+        return None
+
+
 import sqlite3
 import base64
 
@@ -222,6 +312,28 @@ def get_profile(admission_no: str) -> str:
         conn = sqlite3.connect('student.db')
         cursor = conn.cursor()
         cursor.execute("SELECT profile_pic FROM students WHERE admission_no = ?", (admission_no,))
+        result = cursor.fetchone()
+        
+        if result and result[0]:
+            # Convert binary data to base64
+            base64_image = base64.b64encode(result[0]).decode('utf-8')
+            return f"data:image/png;base64,{base64_image}"
+        else:
+            print("No image found for the given admission number.")
+            return None
+            
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+
+#=====================Teachers profile picture
+def get_profile_t(username: str) -> str:
+    try:
+        conn = sqlite3.connect('admin.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT profile_picture FROM admin_data WHERE position = ?", (username,))
         result = cursor.fetchone()
         
         if result and result[0]:
@@ -891,6 +1003,25 @@ def teachers():
     conn.commit()
     conn.close()
 
+def teachers_email():
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT email FROM teachers
+        ''')
+        result = cursor.fetchall()
+        return result
+
+def students_email():
+    with sqlite3.connect('student.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT email FROM students
+        ''')
+        result = cursor.fetchall()
+        return result
+
+
 
 
 
@@ -911,3 +1042,95 @@ def add_all_tables():
     add_non_compliant_students()
     setup_database()
     teachers()
+#===============Get Emails for each person  as per db_name, tableName, colName
+
+def get_emails(db_name, tableName, colName):
+    try:
+        # Connect to the database
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # Execute query to fetch all emails
+        cursor.execute(f"SELECT {colName} FROM {tableName}")
+        emails = [row[0] for row in cursor.fetchall()]
+
+        # Close the connection
+        conn.close()
+
+        return emails
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return []
+
+
+
+
+#======get student password as per email
+def get_password_s(db_name, email):
+    try:
+        # Connect to the SQLite database
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # Query to fetch the password for the given username
+        cursor.execute('''SELECT logins.password 
+        FROM logins
+        JOIN students ON logins.admission_no = students.admission_no
+        WHERE students.email = ?''', (email,))
+        result = cursor.fetchone()
+
+        # Close the connection
+        conn.close()
+
+        # Return the password if found, otherwise return None
+        return result[0] if result else None
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+
+
+#=======================Get password as per manager
+def get_password_m(db_name, email):
+    try:
+        # Connect to the SQLite database
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # Query to fetch the password for the given username
+        cursor.execute('''SELECT logins.password 
+        FROM logins
+        JOIN manager ON logins.username = manager.position
+        WHERE manager.email = ?''', (email,))
+
+        result = cursor.fetchone()
+
+        # Close the connection
+        conn.close()
+
+        # Return the password if found, otherwise return None
+        return result[0] if result else None
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+
+#===========================Get password from registered teachers
+def get_password_t(db_name, email):
+    try:
+        # Connect to the SQLite database
+        conn = sqlite3.connect(db_name)
+        cursor = conn.cursor()
+
+        # Query to fetch the password for the given username
+        cursor.execute('''SELECT logins.password
+        FROM logins
+        JOIN teachers ON logins.position = teachers.username
+        WHERE teachers.email = ?''', (email,))
+        result = cursor.fetchone()
+
+        # Close the connection
+        conn.close()
+        # Return the password if found, otherwise return None
+        return result[0] if result else None
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None

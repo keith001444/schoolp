@@ -16,6 +16,34 @@ html,body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.forgot-password {
+	display: block;
+	margin-top: 10px;
+	text-align: center;
+	color: #89dbe6;
+	font-size: 12px; 
+	text-decoration: none;
+}
+
+.forgot-password:hover {
+	text-decoration: underline;
+	color: #077d8d;
+}
+
+.back-to-login {
+    display: block;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.back-to-login:hover {
+    text-decoration: underline;
+}
+
+
 .form-structor {
 	background-color: #222;
 	border-radius: 15px;
@@ -111,6 +139,7 @@ html,body {
 				}
 			}
 		}
+		
 		
 		.submit-btn {
 			background-color: rgba(0,0,0,0.4);
