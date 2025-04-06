@@ -1,92 +1,160 @@
 {% extends "admin_dashboard.html" %}
 {% block content %}
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        
+        h1 {
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 15px;
+        }
+
+        /* Table Styling */
+        .form-container {
+            background: white;
+            padding: 25px;
+            max-width: 650px;
+            margin: auto;
+            border-radius: 8px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
         table {
             width: 100%;
-            max-width: 600px;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-top: 15px;
         }
+
         th, td {
-            padding: 15px;
+            padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
+
         th {
-            background-color: #f8f8f8;
-            color: #333;
+            background-color: #4F1C51;
+            color: white;
+            text-transform: uppercase;
         }
+
+        td {
+            background-color: #fafafa;
+        }
+
+        /* Select Dropdown Styling */
         select {
             width: 100%;
             padding: 10px;
+            font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            outline: none;
+            transition: all 0.3s ease-in-out;
         }
+
+        select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Submit Button */
         .submit-container {
-            display: flex;
-            justify-content: center;
+            text-align: center;
+            margin-top: 20px;
         }
+
         .submit-container input[type="submit"] {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background-color: #28a745;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
+            transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
         }
+
         .submit-container input[type="submit"]:hover {
             background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            .form-container {
+                width: 90%;
+            }
+            select {
+                font-size: 14px;
+            }
         }
     </style>
-<h1>Set Marks For {{ first_name }} </h1>
-<br>
-<h1>Admission Number: {{ admission_no }}</h1>
-    <form action="/enter_marks/{{ admission_no }}" method="post">
-        <table>
-            <tr>
-                <th>Year</th>
-                <th>Term</th>
-                <th>Type</th>
-            </tr>
-            <tr>
-                <td>
-                    <select name="year" required>
-                        <option value="">Select Year</option>
-                        <!-- Year options from 2000 to 2050 -->
-                        <script>
-                            for (let year = 2000; year <= 2050; year++) {
-                                document.write(`<option value="${year}">${year}</option>`);
-                            }
-                        </script>
-                    </select>
-                </td>
-                <td>
-                    <select name="term" required>
-                        <option value="">Select Term</option>
-                        <option value="1">Term 1</option>
-                        <option value="2">Term 2</option>
-                        <option value="3">Term 3</option>
-                    </select>
-                </td>
-                <td>
-                    <select name="type" required>
-                        <option value="">Select Type</option>
-                        <option value="opener">Opener</option>
-                        <option value="mid-term">Mid-Term</option>
-                        <option value="end-term">End-Term</option>
-                        <option value="mock">Mock</option>
-                        <option value="trial1">Trial 1</option>
-                        <option value="trial2">Trial 2</option>
-                        <option value="trial">Trial</option>
-                        <option value="other">Other</option>
-                    </select>
-                </td>
-            </tr>
-        </table>
-        <div class="submit-container">
-            <input type="submit" value="Submit">
-        </div>
-    </form>
+
+    <div class="form-container">
+        <h1>Set Marks For {{ first_name }}</h1>
+        <h1>Admission Number: {{ admission_no }}</h1>
+        
+        <form action="/enter_marks/{{ admission_no }}" method="post">
+            <table>
+                <tr>
+                    <th>Year</th>
+                    <th>Term</th>
+                    <th>Type</th>
+                </tr>
+                <tr>
+                    <td>
+                        <select name="year" required id="yearDropdown">
+                            <option value="">Select Year</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="term" required>
+                            <option value="">Select Term</option>
+                            <option value="1">Term 1</option>
+                            <option value="2">Term 2</option>
+                            <option value="3">Term 3</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select name="type" required>
+                            <option value="">Select Type</option>
+                            <option value="opener">Opener</option>
+                            <option value="mid-term">Mid-Term</option>
+                            <option value="end-term">End-Term</option>
+                            <option value="mock">Mock</option>
+                            <option value="trial1">Trial 1</option>
+                            <option value="trial2">Trial 2</option>
+                            <option value="trial">Trial</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="submit-container">
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Function to populate year dropdown dynamically
+        function populateYearDropdown() {
+            let yearDropdown = document.getElementById("yearDropdown");
+            let currentYear = new Date().getFullYear();
+
+            for (let year = currentYear - 5; year <= currentYear + 10; year++) {
+                let option = document.createElement("option");
+                option.value = year;
+                option.textContent = year;
+                yearDropdown.appendChild(option);
+            }
+        }
+
+        // Call function on page load
+        document.addEventListener("DOMContentLoaded", populateYearDropdown);
+    </script>
 {% endblock %}

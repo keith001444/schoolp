@@ -1,11 +1,11 @@
-import datetime
+
 import requests
 import profile1
 import send_mail1
 from requests.auth import HTTPBasicAuth
 import base64
 import webbrowser
-
+import qrcode3
 from flask import Flask, render_template, request, redirect,jsonify, flash, url_for, send_from_directory, session, send_file, request
 import sqlite3, os, database, document_functions, json,requests
 import io
@@ -84,8 +84,21 @@ def home():
     admission_number = session.get('admission_no')
     dates, amounts, remaining_balance = graph2.profile(admission_number)
     return render_template('home.html', name=database.get_first_name(admission_no),sname=database.get_last_name(admission_no),email=database.get_email(admission_no),phone_number = database.get_phone(admission_no), gender= database.get_gender(admission_no),profile_pic = database.get_profile(admission_no),
-                           greeting=document_functions.greet_based_on_time(), admission_no=document_functions.replace_slash_with_dot(admission_no),dates=dates, amounts=amounts,remaining_balance=remaining_balance,admission_number= admission_number)
-
+                           greeting=document_functions.greet_based_on_time(), admission_no=document_functions.replace_slash_with_dot(admission_no),dates=dates, amounts=amounts,remaining_balance=remaining_balance,admission_number= admission_number,\
+                           admission_date = database.get_admission_date(admission_number))
+#=============Update student Qr
+@app.route('/updateQrSt')
+def student_qr():
+    admission_no = session.get('admission_no')
+    fname=database.get_first_name(admission_no)
+    lname=database.get_last_name(admission_no)
+    dob = database.get_admission_date_st(admission_no)
+    grade = database.get_grade_st(admission_no)
+    qrcode3.generate_qr_st(fname, lname, dob, admission_no, grade)
+    profile_pic = database.get_profile(admission_no)
+    qrcode_pic = database.get_qr_pic_st(admission_no)
+    print("success")
+    return render_template('stqrcode.html',profile_pic = profile_pic, qrcode_pic = qrcode_pic)
 @app.route('/tdash')
 def teacher_home():
     userName = session.get('userName')
@@ -124,8 +137,10 @@ def student_scores():
 
     # Filter out years with no data
     exam_scores = {year: average for year,average in exam_scores.items() if average}
+    exam_list= database.get_exam_type(admission_no)
 
-    return render_template('examtrend.html', exam_scores=exam_scores, student_id=admission_no, student_marks=view_student_marks(), length = len(view_student_marks()),profile_pic = database.get_profile(admission_no))
+    print(exam_scores)
+    return render_template('examtrend.html', exam_scores=exam_scores, student_id=admission_no, student_marks=view_student_marks(), length = len(view_student_marks()),profile_pic = database.get_profile(admission_no),exam_list=exam_list)
 
 
 @app.route('/settings')
@@ -200,28 +215,61 @@ class_mapping = {
     "11": "Form 5",
     "12": "Form 6",
 }
+class_mapping1 = {
+    "1": "grade1",
+    "2": "grade2",
+    "3": "grade3",
+    "4": "grade4",
+    "5": "grade5",
+    "6": "grade6",
+    "7": "form1",
+    "8": "form2",
+    "9": "form3",
+    "10": "form4",
+    "11": "form5",
+    "12": "form6",
+}
 
-@app.route("/type_check")
-def teacher_classes(teacher_id):
-    conn = sqlite3.connect("school.db")
+@app.route("/type_check2")
+def teacher_classes():
+    teacher_id = session.get('userName')
+    conn = sqlite3.connect("admin.db")
     cursor = conn.cursor()
     
     # Fetch the subjects column for the teacher
-    cursor.execute("SELECT subjects FROM teachers WHERE id = ?", (teacher_id,))
+    cursor.execute("SELECT grade FROM teachers WHERE username = ?", (teacher_id,))
     result = cursor.fetchone()
     conn.close()
 
     if result:
         subject_numbers = result[0].split(",")  # Convert "4,5,6" to ["4", "5", "6"]
         class_options = {num: class_mapping[num] for num in subject_numbers if num in class_mapping}
+        
     else:
         class_options = {}
 
-    return render_template("type_check1.html", class_options=class_options)
+    return render_template("type_check1.html", class_options=class_options, profile_pic = database.get_profile_t(teacher_id))
 
 @app.route('/type_check')
 def type_check():
-    return render_template('type_check.html')
+    teacher_id = session.get('userName')
+    conn = sqlite3.connect("admin.db")
+    cursor = conn.cursor()
+    
+    # Fetch the subjects column for the teacher
+    cursor.execute("SELECT grade FROM teachers WHERE username = ?", (teacher_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        subject_numbers = result[0].split(",")  # Convert "4,5,6" to ["4", "5", "6"]
+        class_options = {num: class_mapping[num] for num in subject_numbers if num in class_mapping}
+        
+    else:
+        class_options = {}
+
+    return render_template("type_check.html", class_options=class_options, profile_pic = database.get_profile_t(teacher_id))
+    
 
 
 @app.route('/students', methods=['GET', 'POST'])
@@ -231,7 +279,7 @@ def view_students():
     exam_type = request.form['type']
     grade = request.form['class']
     data = database.get_students_marks_filtered(year, term, exam_type, grade)
-
+    print(f"the data is:{data}")
     return render_template('exam_list.html', students=data)
 
 
@@ -248,14 +296,31 @@ def enter_student_marks(admission_no):
 
 @app.route('/view_students_marks')
 def view_students_marks():
-    return render_template('view_students_marks.html', students=database.view_students())
+    teacher_id = session.get('userName')
+    conn = sqlite3.connect("admin.db")
+    cursor = conn.cursor()
+    
+    # Fetch the subjects column for the teacher
+    cursor.execute("SELECT grade FROM teachers WHERE username = ?", (teacher_id,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        subject_numbers = result[0].split(",")  # Convert "4,5,6" to ["4", "5", "6"]
+        grade_list = [class_mapping1[num] for num in subject_numbers if num in class_mapping1]
+        print(grade_list)
+
+    else:
+        grade_list = {}
+    return render_template('view_students_marks.html', students=database.view_students(grade_list),profile_pic = database.get_profile_t(teacher_id))
 
 
 @app.route('/<admission_no>')
 def enter_marks(admission_no):
+    teacher_id = session.get('userName')
     admission_n = document_functions.replace_slash_with_slash(admission_no)
     return render_template('type_checker.html', admission_no=admission_no,
-                           first_name=database.get_first_name(admission_n))
+                           first_name=database.get_first_name(admission_n),profile_pic = database.get_profile_t(teacher_id))
 
 
 @app.route('/exam_list')
@@ -388,6 +453,24 @@ def profile():
     else:
         return "No image selected!", 400
 
+@app.route('/tprofile', methods=['POST'])
+def tprofile():
+    username = request.form.get('username')
+    image_file = request.files.get('profile_pic')
+    
+    if image_file:
+        profile1.insert_image_t('admin.db', username, image_file)
+        return redirect(url_for('tsettings'))
+    else:
+        return "No image selected!", 400
+
+
+@app.route('/tsettings')
+def tsettings():
+    username = session.get('userName')
+    profile_pic = database.get_profile_t(username)
+    return render_template('tsettings.html',profile_pic=profile_pic, username = username)
+
 
 @app.route('/compiler')
 def compiler():
@@ -465,7 +548,7 @@ def submit_signup():
         return redirect(url_for('index'))
 
     database.add_someone(admission_no, first_name, middle_name, last_name, gender, age, email)
-    database.add_level(admission_no, grade,phone)
+    database.add_level(admission_no, grade,phone,datetime.now())
     database.put_ill_students(admission_no, sickness, treatment)
     database.add_login(admission_no, last_name)
     sender_email = "richardkeith233@gmail.com"
@@ -823,6 +906,7 @@ def delete_teacher(username):
 #===============Change Password
 @app.route('/change_password', methods=['GET', 'POST'])
 def change_password():
+    admission_number = session.get('admission_no')
     if request.method == 'POST':
         # Get form data
         admission_no = session.get('admission_no')  # Example admission number, ideally you'd get this from session or another source
@@ -852,7 +936,7 @@ def change_password():
             flash('Current password is incorrect.', 'error')
 
         conn.close()
-    return render_template('change_password.html')
+    return render_template('change_password.html',profile_pic = database.get_profile(admission_number))
 
 @app.route('/change_manager_password', methods=['GET', 'POST'])
 def manager_password():
@@ -1212,14 +1296,14 @@ PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
 CALLBACK_URL = "https://crimson-feather-42861.pktriot.net/mpesa_callback"
 
 
-@app.route("/pay_fees",  methods=['GET', 'POST'])
+@app.route("/pay_fees", methods=['GET', 'POST'])
 def stk_push():
     phone = request.form["phone"]
-    session['phone'] = phone
+    if phone.startswith("0"):
+        phone = "254" + phone[1:]  # Convert 0712345678 to 254712345678
     amount = request.form["amount"]
-    session['amount'] = amount
-    account_reference = session.get('admission_no')
     access_token = get_access_token()
+    print("Access Token:", access_token)
 
     if not access_token:
         return jsonify({"error": "Failed to get access token"})
@@ -1228,7 +1312,10 @@ def stk_push():
     password = base64.b64encode((BUSINESS_SHORT_CODE + PASSKEY + timestamp).encode()).decode()
     
     stk_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
     payload = {
         "BusinessShortCode": BUSINESS_SHORT_CODE,
         "Password": password,
@@ -1239,17 +1326,22 @@ def stk_push():
         "PartyB": BUSINESS_SHORT_CODE,
         "PhoneNumber": phone,
         "CallBackURL": CALLBACK_URL,
-        "AccountReference": account_reference,
+        "AccountReference": "account_reference",
         "TransactionDesc": "Fees payment"
     }
+
     response = requests.post(stk_url, json=payload, headers=headers)
-    
+    print("STK Push Response:", response.json())  # Debugging
+    if response.status_code == 200:
+        return jsonify({"status": "success", "message": "Payment in progress"})
+    else:
+        return jsonify({"status": "failure", "message": response.text}), response.status_code
     return jsonify(response.json())
 
 
 # Callback listener to handle the result from Safaricom
 
-@app.route("/mpesa_callback", methods=["POST"])
+@app.route("/mpesa_callback", methods=["POST","GET"])
 def mpesa_callback():
     print("Hello  callback!!1")
     data = request.get_json()
@@ -1276,7 +1368,7 @@ def mpesa_callback():
         return jsonify({"message": "Callback received", "status": status, "description": result_desc})
 
     return jsonify({"error": "Invalid callback data"}), 400
-import pywhatkit
+#import pywhatkit
 
 @app.route('/send_message', methods=['GET','POST'])
 def whatsapp():
@@ -1285,7 +1377,7 @@ def whatsapp():
         phone = "+254110385662"
         message = "Hello, I hope this message finds you well. I have a query. Please assist me."
 
-        pywhatkit.sendwhatmsg_instantly(phone, message)  # Short wait time
+        # pywhatkit.sendwhatmsg_instantly(phone, message)  # Short wait time
         return redirect('/trainer')
     
     except Exception as e:

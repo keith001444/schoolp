@@ -354,7 +354,15 @@ body{
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;  /* Enable vertical scrolling */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
+        url('../static/images/dashboardUni.jpeg'); 
+        
+
+   
 }
+
+
 .container-fluid {
     display: flex;
     flex-direction: row;
@@ -373,7 +381,7 @@ main {
 
 .dashboard {
             text-align: center;
-            background: rgba(255, 255, 255, 0.8);
+            /* background: rgba(255, 255, 255, 0.8); */
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -394,6 +402,7 @@ main {
     border-left: 10px solid var(--blue);
     transition: 0.5s;
     overflow: hidden;
+    overflow-y: auto;
 }
 .navigation.active{
     width: 80px;
@@ -491,7 +500,7 @@ main {
     width: calc(100% - 300px);
     left: 300px;
     min-height: 100vh;
-    background: var(--white);
+    /* background: var(--white); */
     transition: 0.5s;
 }
 .main.active{
@@ -856,6 +865,12 @@ h1{
                     <a href="{{ url_for('student_scores') }}">
                         <span class="icon"><ion-icon name="clipboard"></ion-icon></span>
                         <span class="title">Examinations</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('student_qr') }}">
+                        <span class="icon"><ion-icon name="clipboard"></ion-icon></span>
+                        <span class="title">Qrcode</span>
                     </a>
                 </li>
                 <li>

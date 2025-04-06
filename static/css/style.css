@@ -343,7 +343,13 @@ body{
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;  /* Enable vertical scrolling */
+    background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
+    url('resourses/BG.jpg'); 
+    /* background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(../images/dashboardUni.jpeg); */
+   
 }
+
 .container-fluid {
     display: flex;
     flex-direction: row;
@@ -383,6 +389,7 @@ main {
     border-left: 10px solid var(--blue);
     transition: 0.5s;
     overflow: hidden;
+    overflow-y: auto;
 }
 .navigation.active{
     width: 80px;
@@ -601,15 +608,7 @@ main {
     /* margin-top: 10px; */
 
 }
-.details .recentOrders{
-    position: relative;
-    display: grid;
-    min-height: 500px;
-    background: var(--white);
-    padding: 20px;
-    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-    border-radius: 20px;
-}
+
 .details .cardHeader{
     display: flex;
     justify-content: space-between;
@@ -690,22 +689,7 @@ main {
     font-size: 14px;
     font-weight: 500;
 }
-.recentCustomers{
-    position: relative;
-    display: grid;
-    min-height: 500px;
-    padding: 20px;
-    background: var(--white);
-    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-    border-radius: 20px;
-}
-.recentCustomers .imgBx{
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50px;
-    overflow: hidden;
-}
+
 .recentCustomers .imgBx img{
     position: absolute;
     top: 0;
@@ -800,6 +784,6 @@ position: relative;
 left: 30px;
 padding: 20px;
 }
-h1{
+h1,h2,h3{
     text-align: center;
 }

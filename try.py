@@ -645,7 +645,7 @@ import app2
 # print(f"Password for {username}: {password}" if password else "User not found")
 # import sqlite3
 
-# def add_profile_picture_column(db_name="admin.db"):
+# def add_profile_picture_column(db_name="student.db"):
 #     """Adds a profile_picture column to the users table if it does not exist."""
 #     try:
 #         # Connect to the database
@@ -653,47 +653,300 @@ import app2
 #         cursor = conn.cursor()
 
 #         # Add the column if it does not already exist
-#         cursor.execute("PRAGMA table_info(users)")
-#         columns = [row[1] for row in cursor.fetchall()]
         
-#         if "profile_picture" not in columns:
-#             cursor.execute("ALTER TABLE admin_data ADD COLUMN profile_picture BLOB")
-#             conn.commit()
-#             print("Column 'profile_picture' added successfully.")
-#         else:
-#             print("Column 'profile_picture' already exists.")
+#         cursor.execute("ALTER TABLE rest ADD COLUMN admission_date TEXT")
+#         conn.commit()
+#         print("Column 'admission_date' added successfully.")
+       
+#         # Close the connection
+#         conn.close()
+#     except sqlite3.Error as e:
+#         print(f"Database error: {e}")
+# add_profile_picture_column()
+
+# import sqlite3
+
+# def insert_profile_picture(user_id, image_path, db_name="admin.db"):
+#     """Inserts an image as a profile picture for a user in the SQLite database."""
+#     try:
+#         # Read the image file as binary
+#         with open(image_path, "rb") as file:
+#             image_data = file.read()
+        
+#         # Connect to the database
+#         conn = sqlite3.connect(db_name)
+#         cursor = conn.cursor()
+
+#         # Update the profile_picture column for the given user_id
+#         cursor.execute("UPDATE admin_data SET profile_picture = ? WHERE position = ?", (image_data, user_id))
+#         conn.commit()
+#         print("Profile picture updated successfully.")
 
 #         # Close the connection
 #         conn.close()
 #     except sqlite3.Error as e:
 #         print(f"Database error: {e}")
+#     except FileNotFoundError:
+#         print("Image file not found.")
 
-# # Run the function
-# add_profile_picture_column()
-import sqlite3
+# # Example usage
+# insert_profile_picture('kay', 'cartoon.jpg')  # Replace 1 with the actual user ID and "profile.jpg" with the image path
+# {% extends "admin_dashboard.html" %}
+# {% block content %}
+#     <style>
+#         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-def insert_profile_picture(user_id, image_path, db_name="admin.db"):
-    """Inserts an image as a profile picture for a user in the SQLite database."""
-    try:
-        # Read the image file as binary
-        with open(image_path, "rb") as file:
-            image_data = file.read()
-        
-        # Connect to the database
-        conn = sqlite3.connect(db_name)
-        cursor = conn.cursor()
+#         /* General Styling */
+#         body {
+#             font-family: 'Poppins', sans-serif;
+#             background-color: #eef1f7;
+#             text-align: center;
+#             padding: 20px;
+#         }
 
-        # Update the profile_picture column for the given user_id
-        cursor.execute("UPDATE admin_data SET profile_picture = ? WHERE position = ?", (image_data, user_id))
-        conn.commit()
-        print("Profile picture updated successfully.")
+#         h1 {
+#             color: #333;
+#             font-size: 28px;
+#             margin-bottom: 20px;
+#         }
 
-        # Close the connection
-        conn.close()
-    except sqlite3.Error as e:
-        print(f"Database error: {e}")
-    except FileNotFoundError:
-        print("Image file not found.")
+#         /* Form Container */
+#         .form-container {
+#             background: white;
+#             padding: 30px;
+#             max-width: 750px;
+#             margin: auto;
+#             border-radius: 10px;
+#             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+#         }
 
-# Example usage
-insert_profile_picture('kay', 'cartoon.jpg')  # Replace 1 with the actual user ID and "profile.jpg" with the image path
+#         /* Table Styling */
+#         table {
+#             width: 100%;
+#             border-collapse: collapse;
+#             margin-top: 20px;
+#         }
+
+#         th, td {
+#             padding: 14px;
+#             text-align: left;
+#             border-bottom: 1px solid #ddd;
+#         }
+
+#         th {
+#             background-color: #007bff;
+#             color: white;
+#             text-transform: uppercase;
+#         }
+
+#         td {
+#             background-color: #f9f9f9;
+#         }
+
+#         /* Select Dropdown Styling */
+#         select {
+#             width: 100%;
+#             padding: 12px;
+#             font-size: 16px;
+#             border: 1px solid #ccc;
+#             border-radius: 6px;
+#             outline: none;
+#             transition: all 0.3s ease-in-out;
+#             background: white;
+#         }
+
+#         select:focus {
+#             border-color: #007bff;
+#             box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+#         }
+
+#         /* Submit Button */
+#         .submit-container {
+#             text-align: center;
+#             margin-top: 25px;
+#         }
+
+#         .submit-container input[type="submit"] {
+#             padding: 14px 30px;
+#             background: linear-gradient(to right, #007bff, #0056b3);
+#             border: none;
+#             border-radius: 6px;
+#             color: white;
+#             font-size: 18px;
+#             font-weight: bold;
+#             cursor: pointer;
+#             transition: all 0.3s ease-in-out;
+#         }
+
+#         .submit-container input[type="submit"]:hover {
+#             background: linear-gradient(to right, #0056b3, #003f7f);
+#             transform: scale(1.05);
+#         }
+
+#         /* Responsive Design */
+#         @media screen and (max-width: 600px) {
+#             .form-container {
+#                 width: 90%;
+#                 padding: 20px;
+#             }
+#             select {
+#                 font-size: 14px;
+#             }
+#         }
+#     </style>
+
+#     <div class="form-container">
+#         <h1>Select Student Details</h1>
+
+#         <form action="/students" method="post">
+#             <table>
+#                 <tr>
+#                     <th>Year</th>
+#                     <th>Term</th>
+#                     <th>Type</th>
+#                     <th>Class</th>
+#                 </tr>
+#                 <tr>
+#                     <td>
+#                         <select name="year" required id="yearDropdown">
+#                             <option value="">Select Year</option>
+#                         </select>
+#                     </td>
+#                     <td>
+#                         <select name="term" required>
+#                             <option value="">Select Term</option>
+#                             <option value="1">Term 1</option>
+#                             <option value="2">Term 2</option>
+#                             <option value="3">Term 3</option>
+#                         </select>
+#                     </td>
+#                     <td>
+#                         <select name="type" required>
+#                             <option value="">Select Type</option>
+#                             <option value="opener">Opener</option>
+#                             <option value="mid-term">Mid-Term</option>
+#                             <option value="end-term">End-Term</option>
+#                             <option value="mock">Mock</option>
+#                             <option value="trial1">Trial 1</option>
+#                             <option value="trial2">Trial 2</option>
+#                             <option value="trial">Trial</option>
+#                             <option value="other">Other</option>
+#                         </select>
+#                     </td>
+#                     <td>
+#                         <select name="class" required>
+#                             <option value="">Select Class</option>
+#                             <option value="play_group1">PP1</option>
+#                             <option value="play_group2">PP2</option>
+#                             <option value="grade1">Grade 1</option>
+#                             <option value="grade2">Grade 2</option>
+#                             <option value="grade3">Grade 3</option>
+#                             <option value="grade4">Grade 4</option>
+#                             <option value="grade5">Grade 5</option>
+#                             <option value="grade6">Grade 6</option>
+#                             <option value="form1">Form 1</option>
+#                             <option value="form2">Form 2</option>
+#                             <option value="form3">Form 3</option>
+#                             <option value="form4">Form 4</option>
+#                             <option value="form5">Form 5</option>
+#                             <option value="form6">Form 6</option>
+#                         </select>
+#                     </td>
+#                 </tr>
+#             </table>
+
+#             <div class="submit-container">
+#                 <input type="submit" value="Submit">
+#             </div>
+#         </form>
+#     </div>
+
+#     <script>
+#         // Function to populate year dropdown dynamically
+#         function populateYearDropdown() {
+#             let yearDropdown = document.getElementById("yearDropdown");
+#             let currentYear = new Date().getFullYear();
+
+#             for (let year = currentYear - 5; year <= currentYear + 10; year++) {
+#                 let option = document.createElement("option");
+#                 option.value = year;
+#                 option.textContent = year;
+#                 yearDropdown.appendChild(option);
+#             }
+#         }
+
+#         // Call function on page load
+#         document.addEventListener("DOMContentLoaded", populateYearDropdown);
+#     </script>
+# {% endblock %}
+    # <!-- <script>
+    #     // Student scores data from the server
+    #     const studentScores = {{ exam_scores | safe }};
+
+    #     // X-axis labels
+    #     const terms = ['Term 1 Exam 1', 'Term 1 Exam 2', 'Term 1 Exam 3',
+    #                    'Term 2 Exam 1', 'Term 2 Exam 2', 'Term 2 Exam 3',
+    #                    'Term 3 Exam 1', 'Term 3 Exam 2', 'Term 3 Exam 3'];
+
+    #     // Create datasets for each year with data
+    #     const datasets = Object.keys(studentScores).map(year => ({
+    #         label: `Year ${year}`,
+    #         data: studentScores[year] || Array(9).fill(null),  // Fill with null if no data for that term
+    #         fill: false,
+    #         borderColor: getRandomColor(),
+    #         tension: 0.1
+    #     }));
+
+    #     // Function to generate random colors for the lines
+    #     function getRandomColor() {
+    #         const letters = '0123456789ABCDEF';
+    #         let color = '#';
+    #         for (let i = 0; i < 6; i++) {
+    #             color += letters[Math.floor(Math.random() * 16)];
+    #         }
+    #         return color;
+    #     }
+
+    #     // Create the chart
+    #     const ctx = document.getElementById('studentScoresChart').getContext('2d');
+    #     const studentScoresChart = new Chart(ctx, {
+    #         type: 'line',
+    #         data: {
+    #             labels: terms,
+    #             datasets: datasets
+    #         },
+    #         options: {
+    #             responsive: true,
+    #             plugins: {
+    #                 legend: {
+    #                     position: 'top',
+    #                 },
+    #                 title: {
+    #                     display: true,
+    #                     text: '{{ student_id }} Scores Over the Years'
+    #                 }
+    #             },
+    #             scales: {
+    #                 x: {
+    #                     title: {
+    #                         display: true,
+    #                         text: 'Examinations'
+    #                     },
+    #                     ticks: {
+    #                         maxRotation: 45,
+    #                         minRotation: 45
+    #                     }
+    #                 },
+    #                 y: {
+    #                     title: {
+    #                         display: true,
+    #                         text: 'Scores'
+    #                     },
+    #                     beginAtZero: false
+    #                 }
+    #             }
+    #         }
+    #     });
+    # </script> -->
+# import database
+# print(database.get_exam_type("EB3/57373/21"))

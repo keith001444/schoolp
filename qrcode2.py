@@ -30,36 +30,3 @@ def read_qr_from_image(filename):
     else:
         return "No QR code found."
 
-def scan_qr_with_camera():
-    """Scans a QR code using the device camera."""
-    cap = cv2.VideoCapture(0)
-    print("Scanning for QR code... Press 'q' to exit.")
-    
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        
-        decoded_objects = decode(frame)
-        for obj in decoded_objects:
-            qr_data = obj.data.decode("utf-8")
-            print("QR Code Data:", qr_data)
-            cap.release()
-            cv2.destroyAllWindows()
-            return qr_data
-        
-        cv2.imshow("QR Code Scanner", frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    
-    cap.release()
-    cv2.destroyAllWindows()
-    return "No QR code detected."
-
-# Example Usage
-generate_qr("John Doe", "12345", "2002-05-15", "A001")
-print("Decoded Data from Image:")
-print(read_qr_from_image("student_qr.png"))
-
-print("Scanning QR Code from Camera:")
-print(scan_qr_with_camera())

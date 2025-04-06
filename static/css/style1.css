@@ -407,7 +407,9 @@ body{
      height: 100%;
     min-height: 100vh;
     overflow-x: hidden;
-}
+    /* background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(../images/dashboardUni.jpeg) */
+     
+  }
 .dashboard {
             text-align: center;
             background: rgba(255, 255, 255, 0.8);
@@ -433,6 +435,7 @@ body{
     border-left: 10px solid var(--blue);
     transition: 0.5s;
     overflow: hidden;
+    overflow-y: auto;
 }
 
 

@@ -187,6 +187,35 @@ def get_last_name(admission_no):
         return result[0]  # Return the last name
     else:
         return None
+def get_admission_date_st(admission_no):
+    with sqlite3.connect('student.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT admission_date
+            FROM rest
+            WHERE admission_no = ?
+        ''', (admission_no,))
+
+        result = cursor.fetchone()
+    if result:
+        return result[0]  # Return the last name
+    else:
+        return None
+
+def get_grade_st(admission_no):
+    with sqlite3.connect('student.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT grade
+            FROM rest
+            WHERE admission_no = ?
+        ''', (admission_no,))
+
+        result = cursor.fetchone()
+    if result:
+        return result[0]  # Return the last name
+    else:
+        return None
 
 
 def get_last_name_t(username):
@@ -328,6 +357,27 @@ def get_profile(admission_no: str) -> str:
     finally:
         conn.close()
 
+def get_qr_pic_st(admission_no: str) -> str:
+    try:
+        conn = sqlite3.connect('student.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT qrcode_st FROM students WHERE admission_no = ?", (admission_no,))
+        result = cursor.fetchone()
+        
+        if result and result[0]:
+            # Convert binary data to base64
+            base64_image = base64.b64encode(result[0]).decode('utf-8')
+            return f"data:image/png;base64,{base64_image}"
+        else:
+            print("No qrcode found for the given admission number.")
+            return None
+            
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        conn.close()
+
 #=====================Teachers profile picture
 def get_profile_t(username: str) -> str:
     try:
@@ -355,21 +405,56 @@ def get_profile_t(username: str) -> str:
 
 
 #---------Get
-def view_students():
+# def view_students():
+#     # Connect to the SQLite database
+#     conn = sqlite3.connect('student.db')
+#     cursor = conn.cursor()
+
+#     # Fetch all students
+#     cursor.execute('''SELECT students.admission_no, students.first_name, students.last_name, rest.Grade
+#         FROM students
+#         JOIN rest
+#         ON students.admission_no = rest.admission_no
+#         ORDER BY rest.Grade DESC''')
+#     students = cursor.fetchall()
+#     processed_students = [
+#         (document_functions.replace_slash_with_dot(student[0]), student[1].capitalize(), student[2].capitalize(),student[3])
+#         for student in students
+#     ]
+#     # Close the connection
+#     conn.close()
+#     return processed_students
+
+    grade_list = ['form1', 'form3', 'form4']
+def view_students(grade_list):
     # Connect to the SQLite database
     conn = sqlite3.connect('student.db')
     cursor = conn.cursor()
 
-    # Fetch all students
-    cursor.execute("SELECT admission_no, first_name, last_name FROM students")
+    # Define the list of grades to filter
+ 
+
+    # Create a query with placeholders for dynamic filtering
+    query = '''SELECT students.admission_no, students.first_name, students.last_name, rest.Grade
+               FROM students
+               JOIN rest ON students.admission_no = rest.admission_no
+               WHERE rest.Grade IN ({})
+               ORDER BY rest.Grade DESC'''.format(','.join(['?'] * len(grade_list)))
+
+    # Execute the query with the grade_list values
+    cursor.execute(query, grade_list)
     students = cursor.fetchall()
+
+    # Process student data
     processed_students = [
-        (document_functions.replace_slash_with_dot(student[0]), student[1].capitalize(), student[2].capitalize())
+        (document_functions.replace_slash_with_dot(student[0]), student[1].capitalize(), student[2].capitalize(), student[3])
         for student in students
     ]
+
     # Close the connection
     conn.close()
     return processed_students
+
 
 
 #-----------Get Students and Their Marks
@@ -452,16 +537,17 @@ def add_login(admission_no, password):
 
 
 #add details rest table Contains the Class of the student
-def add_level(admission_no, grade, phone):
+def add_level(admission_no, grade, phone, admission_date):
     with sqlite3.connect('student.db') as conn:
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO rest(
             admission_no,
             Grade,
-            phone_number
-                ) VALUES (?, ?, ?)
-            ''', (admission_no, grade, phone))
+            phone_number,
+            admission_date
+                ) VALUES (?, ?, ?, ?)
+            ''', (admission_no, grade, phone, admission_date))
         conn.commit()
 
 
@@ -986,6 +1072,29 @@ def get_admission_number(first_name, last_name):
         ''',(first_name.upper(), last_name.upper()))
         admission_number = cursor.fetchone()[0]
     return admission_number
+#==================GET ADMISSION DATE 
+def get_admission_date(admission_no):
+    with sqlite3.connect('student.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT admission_date
+        FROM rest
+        WHERE admission_no = ?
+        ''',(admission_no,))
+        admission_date = cursor.fetchone()[0]
+    return admission_date
+#===============GET EXAM TYPE
+def get_exam_type(admission_no):
+    with sqlite3.connect('student.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT type 
+        FROM Examinations
+        WHERE admission_no = ?
+        ''',(admission_no,))
+        exam_list = cursor.fetchall()
+    return [exam[0] for exam in exam_list]
+
 def teachers():
     conn = sqlite3.connect('admin.db')
     cursor = conn.cursor()
