@@ -910,6 +910,26 @@ def student_exist(admission_no):
         existing_student = cursor.fetchone()
         return existing_student
 
+def student_email_exist(email):
+    with sqlite3.connect('student.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM students WHERE email = ?",(email,))
+        existing_email = cursor.fetchone()
+        return existing_email
+
+def teacher_exist(username):
+    with sqlite3.connect('admin.db') as conn:
+        cursor =conn.cursor()
+        cursor.execute("SELECT * FROM teachers WHERE username = ?"(username,))
+        existing_user = cursor.fetchone()
+        return existing_user
+
+def teacher_email_exist(email):
+    with sqlite3.connect('admin.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM teachers WHERE email = ?",(email,))
+        existing_email = cursor.fetchone()
+        return existing_email
 #============average Table
 def average_table():
     with sqlite3.connect('student.db') as conn:

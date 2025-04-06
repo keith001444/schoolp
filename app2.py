@@ -542,15 +542,22 @@ def submit_signup():
     phone = request.form['phone']
     email = request.form['email']
     existing_student = database.student_exist(admission_no)
+    existing_student_email = database.student_email_exist(email)
     if existing_student:
         # Admission number already exists
         flash("Error: A student with this admission number already exists.", "error")
         return redirect(url_for('index'))
-
-    database.add_someone(admission_no, first_name, middle_name, last_name, gender, age, email)
-    database.add_level(admission_no, grade,phone,datetime.now())
-    database.put_ill_students(admission_no, sickness, treatment)
-    database.add_login(admission_no, last_name)
+    if existing_student_email:
+        # Admission number already exists
+        flash("Error: A student with this admission number already exists.", "error")
+        return redirect(url_for('index'))
+    try:
+        database.add_someone(admission_no, first_name, middle_name, last_name, gender, age, email)
+        database.add_level(admission_no, grade,phone,datetime.now())
+        database.put_ill_students(admission_no, sickness, treatment)
+        database.add_login(admission_no, last_name)
+    except sqlite3.IntegrityError:
+        flash('Try again Later')
     sender_email = "richardkeith233@gmail.com"
     sender_password = "mnoj wsox aumw tkrs"  # Use App Password if 2FA is enabled
     recipient_email = email
@@ -1405,30 +1412,47 @@ def signup():
     subject = request.form['subject']
     date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    conn = sqlite3.connect('admin.db')
-    cursor = conn.cursor()
-    cursor.execute('INSERT INTO teachers (username, email, phone, grade, subject, date) VALUES (?, ?, ?, ?, ?, ?)', 
-                   (username, email, phone, grade, subject, date))
-    conn.commit()
-    cursor.execute('INSERT INTO logins(position, password) VALUES(?, ?)',(username, password))
-    conn.commit()
-    cursor.execute(
-    'INSERT INTO admin_data (position, f_name, m_name, l_name, gender, age, id_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    (username, f_name, m_name, l_name, gender, age, id_number))
+    existing_teacher = teacher_exist(username)
+    existing_email = teacher_email_exist(email)
 
-    conn.commit()
-    conn.close()
+    if existing_email:
+        # Admission number already exists
+        flash("Error: A teacher with this username already exists.", "error")
+        return redirect(url_for('add_or_remove_student'))
+
+    if existing_teacher:
+        # Admission number already exists
+        flash("Error: A teacher with this username already exists.", "error")
+        return redirect(url_for('add_or_remove_student'))
+    try:
+        conn = sqlite3.connect('admin.db')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO teachers (username, email, phone, grade, subject, date) VALUES (?, ?, ?, ?, ?, ?)', 
+                    (username, email, phone, grade, subject, date))
+        conn.commit()
+        cursor.execute('INSERT INTO logins(position, password) VALUES(?, ?)',(username, password))
+        conn.commit()
+        cursor.execute(
+        'INSERT INTO admin_data (position, f_name, m_name, l_name, gender, age, id_number) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        (username, f_name, m_name, l_name, gender, age, id_number))
+
+        conn.commit()
+        conn.close()
+    except sqlite3.IntegrityError:
+        flash('Username or email already taken. Please choose another username.')
     sender_email = "richardkeith233@gmail.com"
     sender_password = "mnoj wsox aumw tkrs"  # Use App Password if 2FA is enabled
     recipient_email = email
     password2 = l_name
 
-    subject = "Crimsons portal"
+    subject = "Crimsons Portal Message"
     body = f"Welcome teacher {f_name} {l_name} and feel at home your last name will be your default password: {password2} and Username: {username}"
 
     send_mail1.send_email(sender_email,recipient_email, sender_password, password2, subject, body)
 
-    return "Teacher Signup Successful!"
+    return render_template('teacher_success_signup.html')
+
+
 
 @app.route('/delete_students', methods=['GET','POST'])
 def delete_students():
