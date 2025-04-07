@@ -1,48 +1,93 @@
 {% extends "dashboard.html" %}
 {% block content %}
- <style>
-     .details table{
-    width: 100%;
-    border-collapse:collapse;
-    margin-top: 10px;
-}
-.details table thead td{
-    font-weight: 600;
-}
-.details .recentOrders table tr{
-    color: var(--black1);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-.details .recentOrders table tr:last-child{
-    border-bottom: none;
-}
-.details .recentOrders table tbody tr:hover{
-    background: var(--blue);
-    color: var(--white);
-}
-.details .recentOrders table tr td{
-    padding: 10px;
-}
-.details .recentOrders table tr td:last-child{
-    text-align: end;
-}
-.details .recentOrders table tr td:nth-child(2){
-    text-align: end;
-}
-.details .recentOrders table tr td:nth-child(3){
-    text-align: center;
-}
-        table, th, td {
-            border: 1px solid black;
+<style>
+    .dashboard {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+       
+    }
+
+    
+
+   
+
+    h5 {
+        /* margin-top: 30px; */
+        font-size: 18px;
+        color: #333;
+        font-weight: 600;
+        border-left: 4px solid #007bff;
+        padding-left: 10px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #007bff;
+        color: #fff;
+        font-weight: 600;
+        border-bottom: 2px solid #0056b3;
+    }
+
+    td {
+        border-bottom: 1px solid #e9ecef;
+        color: #333;
+    }
+
+    tr:hover td {
+        background-color: #f1f9ff;
+        transition: background 0.2s ease-in-out;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+        table, thead, tbody, th, td, tr {
+            display: block;
         }
-        th, td {
-            padding: 10px;
+
+        thead {
+            display: none;
+        }
+
+        tr {
+            margin-bottom: 15px;
+        }
+
+        td {
+            text-align: right;
+            padding-left: 50%;
+            position: relative;
+        }
+
+        td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 15px;
+            width: 45%;
+            padding-left: 15px;
+            font-weight: bold;
             text-align: left;
         }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    }
+</style>
+
 <div class="dashboard">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <canvas id="studentScoresChart" width="400" height="200"></canvas>
@@ -119,7 +164,7 @@
 <div class="container">
 {% if student_marks %}
 
-{% for marks in range(length) %}
+{% for marks in range(3) %}
 <h5>year = {{ student_marks[marks][1] }} term =  {{ student_marks[marks][2] }} type =  {{ student_marks[marks][3] }}</h5>
     <table>
         <thead>
@@ -132,47 +177,47 @@
 
             <tr>
                 <td>Mathematics</td>
-                <td> {{ student_marks[marks][4] }}</td>
+                <td data-label="Mathematics"> {{ student_marks[marks][4] }}</td>
             </tr>
              <tr>
                 <td>Biology</td>
-                <td>{{ student_marks[marks][5] }}</td>
+                <td data-label="Biology">{{ student_marks[marks][5] }}</td>
             </tr>
              <tr>
                 <td>Chemistry</td>
-                <td>{{ student_marks[marks][6] }}</td>
+                <td data-label="Chemistry">{{ student_marks[marks][6] }}</td>
             </tr>
              <tr>
                 <td>Physics</td>
-                <td>{{ student_marks[marks][7] }}</td>
+                <td data-label="Physics">{{ student_marks[marks][7] }}</td>
             </tr>
              <tr>
                 <td>Geography</td>
-                <td>{{ student_marks[marks][8] }}</td>
+                <td data-label="Geography">{{ student_marks[marks][8] }}</td>
             </tr>
             <tr>
                 <td>Business</td>
-                <td>{{ student_marks[marks][9] }}</td>
+                <td data-label="Business">{{ student_marks[marks][9] }}</td>
             </tr>
             <tr>
                 <td>English</td>
-                <td>{{ student_marks[marks][10] }}</td>
+                <td data-label="English">{{ student_marks[marks][10] }}</td>
             </tr>
             <tr>
                 <td>Kiswahili</td>
-                <td>{{ student_marks[marks][11] }}</td>
+                <td data-label="Kiswahili">{{ student_marks[marks][11] }}</td>
             </tr>
             <tr>
                 <td>C.R.E</td>
-                <td>{{ student_marks[marks][12] }}</td>
+                <td data-label="CRE">{{ student_marks[marks][12] }}</td>
             </tr>
             <tr>
                 <td>French</td>
-                <td>{{ student_marks[marks][13] }}</td>
+                <td data-label="French">{{ student_marks[marks][13] }}</td>
             </tr>
             <tr>
                 <td>Average</td>
-                <td>{{ student_marks[marks][14] }}</td>
+                <td data-label="Average">{{ student_marks[marks][14] }}</td>
             </tr>
 
         </tbody>

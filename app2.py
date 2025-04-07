@@ -452,6 +452,82 @@ def profile():
         return redirect(url_for('settings'))
     else:
         return "No image selected!", 400
+@app.route('/student_phone_u', methods=['POST'])
+def phone_number_update():
+    admission_no = session.get('admission_no')
+    phone_number = request.form.get('phone')
+
+    if phone_number and admission_no:
+        try:
+            with sqlite3.connect('student.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE rest SET phone_number = ? WHERE admission_no = ?", 
+                               (phone_number, admission_no))
+                conn.commit()
+                return redirect(url_for('settings'))
+        except Exception as e:
+            return f"Error: {e}"
+    else:
+        return "Invalid phone number or session expired"
+
+
+@app.route('/email_update', methods=["POST"])
+def email_update():
+    admission_no = session.get('admission_no')
+    email = request.form.get('email')
+
+    if email:
+        try:
+            with sqlite3.connect('student.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE students SET email = ? WHERE admission_no = ?", 
+                           (email, admission_no))
+                conn.commit()
+                return redirect(url_for('settings'))
+        except Exception as e:
+            return f"Error: {e}"
+    
+    else:
+        return f"Invalid email address"
+
+
+@app.route('/teacher_phone_u', methods=["POST"])
+def tphone_number_update():
+    userName = session.get('userName')
+    phone_number = request.form.get('phone')
+
+    if phone_number:
+        try:
+            with sqlite3.connect('admin.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE teachers SET phone = ? WHERE username = ?", 
+                           (phone_number, userName))
+                conn.commit()
+                return redirect(url_for('tsettings'))
+        except Exception as e:
+            return f"Error: {e}"
+    
+    else:
+        return f"Invalid phone number"
+
+@app.route('/teacher_email_update', methods=["POST"])
+def temail_update():
+    userName = session.get('userName')
+    email = request.form.get('email')
+
+    if phone_number:
+        try:
+            with sqlite3.connect('admin.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE teachers SET email = ? WHERE username = ?", 
+                           (email, userName))
+                conn.commit()
+                return redirect(url_for('tsettings'))
+        except Exception as e:
+            return f"Error: {e}"
+    
+    else:
+        return f"Invalid email address"
 
 @app.route('/tprofile', methods=['POST'])
 def tprofile():
@@ -944,6 +1020,39 @@ def change_password():
 
         conn.close()
     return render_template('change_password.html',profile_pic = database.get_profile(admission_number))
+
+@app.route('/tchange_password', methods=['GET', 'POST'])
+def tchange_password():
+    userName = session.get('userName')
+    if request.method == 'POST':
+        # Get form data
+        current_password = request.form['current_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        # Connect to the database
+        conn = sqlite3.connect('admin.db')
+        cursor = conn.cursor()
+
+        # Check if current password is correct
+        cursor.execute("SELECT password FROM logins WHERE position = ?", (userName,))
+        result = cursor.fetchone()
+
+        if result and result[0] == current_password:
+            # Check if the new password and confirmation match
+            if new_password == confirm_password:
+                # Update the password in the logins table
+                cursor.execute("UPDATE logins SET password = ? WHERE position = ?", (new_password, userName))
+                conn.commit()
+                flash('Password changed successfully!', 'success')
+                return redirect(url_for('tdash'))
+            else:
+                flash('New password and confirmation do not match.', 'error')
+        else:
+            flash('Current password is incorrect.', 'error')
+
+        conn.close()
+    return render_template('tchange_password.html',profile_pic  = database.get_profile_t(userName))
 
 @app.route('/change_manager_password', methods=['GET', 'POST'])
 def manager_password():

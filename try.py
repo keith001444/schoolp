@@ -950,3 +950,14 @@ import app2
     # </script> -->
 # import database
 # print(database.get_exam_type("EB3/57373/21"))
+import sqlite3
+
+with sqlite3.connect('student.db') as conn:
+    cursor = conn.cursor()
+    cursor.execute('''
+    UPDATE Examinations 
+    SET average = 46.14 
+    WHERE admission_no = ? AND term = 1 AND type = ?
+    ''', ("EB3/57373/21", "opener"))
+    conn.commit()
+    print("success in updates")
